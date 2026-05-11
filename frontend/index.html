@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Escalas - Shekinah IAD</title>
+
+  <script>
+    (function () {
+      const temaSalvo = localStorage.getItem("shekinah-theme");
+      document.documentElement.setAttribute("data-theme", temaSalvo === "dark" ? "dark" : "light");
+    })();
+  </script>
+
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/login.css">
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="css/voluntario.css">
+  <link rel="stylesheet" href="css/responsivo.css">
+</head>
+<body>
+
+<button id="themeToggleBtn" class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Ativar tema escuro" title="Ativar tema escuro">
+  <span class="theme-toggle-icon" id="themeToggleIcon">E</span>
+  <span class="theme-toggle-label" id="themeToggleLabel">Tema escuro</span>
+</button>
+
+<div id="telaLogin" class="login-page">
+  <div class="login-card">
+    <div class="login-logo">
+      <img src="img/logo-shekinah.svg" alt="Shekinah IAD">
+      <h2>Sistema de Escalas<br>Ministeriais</h2>
+      <p>Igreja Shekinah IAD - Um projeto de Deus</p>
+    </div>
+
+    <div class="login-divider"></div>
+
+    <div class="login-switch">
+      <button id="abaEntrar" class="login-switch-btn active" type="button" onclick="alternarModoLogin('entrar')">Entrar</button>
+      <button id="abaCriarConta" class="login-switch-btn" type="button" onclick="alternarModoLogin('cadastro')">Criar conta</button>
+    </div>
+
+    <div id="painelLogin">
+      <div class="login-field">
+        <label>Usuario</label>
+        <input type="text" id="loginUsuario" placeholder="Digite seu usuario" value="admin">
+      </div>
+      <div class="login-field">
+        <label>Senha</label>
+        <input type="password" id="loginSenha" placeholder="Digite sua senha" value="1234">
+      </div>
+      <div class="login-field">
+        <label>Perfil de acesso</label>
+        <select id="loginPerfil">
+          <option value="admin">Administrador</option>
+          <option value="voluntario">Voluntario</option>
+        </select>
+      </div>
+
+      <button class="btn-login" onclick="fazerLogin()">Entrar no sistema</button>
+
+      <div class="login-hint">
+        <strong>Admin:</strong> admin / 1234
+        &nbsp;|&nbsp;
+        <strong>Voluntario:</strong> joao, maria, carlos, ana, pedro - senha: 1234
+      </div>
+    </div>
+
+    <div id="painelCadastro" class="hidden">
+      <div class="login-field">
+        <label>Nome completo</label>
+        <input type="text" id="cadastroNome" placeholder="Seu nome completo">
+      </div>
+      <div class="login-field">
+        <label>Usuario</label>
+        <input type="text" id="cadastroUsuario" placeholder="Escolha um usuario">
+      </div>
+      <div class="login-field">
+        <label>Senha</label>
+        <input type="password" id="cadastroSenha" placeholder="Crie uma senha">
+      </div>
+      <div class="login-field">
+        <label>Ministerio</label>
+        <select id="cadastroMinisterio">
+          <option value="">Selecione um ministerio</option>
+        </select>
+      </div>
+      <div class="login-grid">
+        <div class="login-field">
+          <label>E-mail</label>
+          <input type="email" id="cadastroEmail" placeholder="email@exemplo.com">
+        </div>
+        <div class="login-field">
+          <label>Telefone</label>
+          <input type="text" id="cadastroTelefone" placeholder="(00) 00000-0000">
+        </div>
+      </div>
+
+      <button class="btn-login" onclick="criarConta()">Criar conta e entrar</button>
+
+      <div class="login-hint">
+        Seu cadastro cria um login de voluntario e salva seus dados no banco do sistema.
+      </div>
+    </div>
+
+    <p class="login-footer">Shekinah IAD &copy; 2026 - Todos os direitos reservados</p>
+  </div>
+</div>
+
+<div id="appContainer" class="hidden">
+  <header class="app-header">
+    <button id="mobileMenuToggle" class="mobile-menu-toggle" type="button" onclick="toggleMobileMenu()" aria-label="Abrir menu" title="Abrir menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    <div class="header-brand">
+      <img src="img/logo-shekinah.svg" alt="Logo" class="header-logo">
+      <div class="header-brand-text">
+        <span class="header-brand-name">Shekinah IAD</span>
+        <span class="header-brand-sub">Sistema de Escalas</span>
+      </div>
+      <span class="header-badge" id="headerBadge">Admin</span>
+    </div>
+    <div class="header-user">
+      <span id="headerNome">Administrador</span>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <div id="mobileNavBackdrop" class="mobile-nav-backdrop hidden" onclick="fecharMenuMobile()"></div>
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="main-content" id="mainContent"></main>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="modalOverlay" onclick="fecharModal(event)">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<div id="toastContainer"></div>
+
+<script src="js/dados.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/validacoes.js"></script>
+<script src="js/conflitos.js"></script>
+<script src="js/login.js"></script>
+<script src="js/admin.js"></script>
+<script src="js/escalas.js"></script>
+<script src="js/voluntario.js"></script>
+
+</body>
+</html>

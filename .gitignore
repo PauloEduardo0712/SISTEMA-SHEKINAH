@@ -1,0 +1,6 @@
+backend/build/
+backend/.gradle/
+backend/bootrun.log
+backend/bootrun-2.log
+.idea/
+.vscode/

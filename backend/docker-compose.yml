@@ -1,0 +1,17 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: escala-shekinah-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: escala_shekinah
+      MYSQL_USER: escala_user
+      MYSQL_PASSWORD: escala_pass
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:
