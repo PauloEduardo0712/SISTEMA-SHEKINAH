@@ -2,7 +2,7 @@
    DADOS.JS - Estado global e integracao com API
    ============================================= */
 
-const API_BASE_URL = localStorage.getItem("shekinah-api-url") || "http://localhost:8081/api";
+const API_BASE_URL = "http://localhost:8081/api";
 const AUTH_STORAGE_KEY = "shekinah-auth";
 
 const DIAS_SEMANA = [
@@ -146,11 +146,7 @@ function getApiBaseUrls() {
   const configuredUrl = localStorage.getItem("shekinah-api-url");
   const candidates = [
     configuredUrl,
-    API_BASE_URL,
-    "http://localhost:8081/api",
-    "http://localhost:8080/api",
-    "http://127.0.0.1:8081/api",
-    "http://127.0.0.1:8080/api"
+    API_BASE_URL
   ];
 
   return [...new Set(

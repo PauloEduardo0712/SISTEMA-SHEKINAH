@@ -92,7 +92,6 @@ async function fazerLogin() {
 
     saveAuthState();
     await atualizarAplicacaoAposLogin();
-    toast("Login realizado com sucesso.", "success");
   } catch (error) {
     toast(error.message || "Nao foi possivel fazer login.", "danger");
   }
@@ -143,7 +142,6 @@ async function criarConta() {
 
     saveAuthState();
     await atualizarAplicacaoAposLogin();
-    toast("Conta criada com sucesso.", "success");
   } catch (error) {
     toast(error.message || "Nao foi possivel criar sua conta.", "danger");
   }

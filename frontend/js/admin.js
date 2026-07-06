@@ -108,6 +108,7 @@ function renderPagina(pagina) {
 
   const fn = mapa[pagina];
   if (fn) main.innerHTML = fn();
+  prepararTabelasResponsivas(main);
 }
 
 function renderDashboardAdmin() {

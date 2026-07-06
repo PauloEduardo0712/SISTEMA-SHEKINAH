@@ -1,6 +1,34 @@
-backend/build/
-backend/.gradle/
-backend/bootrun.log
-backend/bootrun-2.log
+# IDE/local machine
 .idea/
 .vscode/
+
+# Environment files
+.env
+.env.local
+*.local
+
+# Node/React build output
+frontend/node_modules/
+frontend/dist/
+frontend/*.tsbuildinfo
+mobile/node_modules/
+mobile/.expo/
+mobile/dist/
+mobile/web-build/
+mobile/*.tsbuildinfo
+
+# Java/Gradle build output
+backend/.gradle/
+backend/build/
+
+# Runtime logs and local database locks
+backend/*.log
+backend/*.err.log
+backend/data/*.mv.db
+backend/data/*.lock.db
+backend/data/*.trace.db
+mobile/expo.log
+
+# OS/editor noise
+.DS_Store
+Thumbs.db

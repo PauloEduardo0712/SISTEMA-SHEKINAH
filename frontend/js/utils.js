@@ -30,7 +30,7 @@ function atualizarBotaoTema() {
   const button = document.getElementById("themeToggleBtn");
   const temaEscuro = getCurrentTheme() === "dark";
 
-  if (icon) icon.textContent = temaEscuro ? "C" : "E";
+  if (icon) icon.textContent = temaEscuro ? "☀" : "☾";
   if (label) label.textContent = temaEscuro ? "Tema claro" : "Tema escuro";
 
   if (button) {
@@ -119,6 +119,19 @@ function fecharModal(e) {
 function fecharModalDireto() {
   document.getElementById("modalOverlay").classList.add("hidden");
   document.body.classList.remove("modal-open");
+}
+
+function prepararTabelasResponsivas(container = document) {
+  container.querySelectorAll("table").forEach(table => {
+    const headers = Array.from(table.querySelectorAll("thead th")).map(th => th.textContent.trim());
+    table.querySelectorAll("tbody tr").forEach(row => {
+      Array.from(row.children).forEach((cell, index) => {
+        if (headers[index]) {
+          cell.setAttribute("data-label", headers[index]);
+        }
+      });
+    });
+  });
 }
 
 /**
