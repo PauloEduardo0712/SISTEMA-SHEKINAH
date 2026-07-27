@@ -150,6 +150,7 @@ function getApiBaseUrls() {
   const configuredUrl = localStorage.getItem("shekinah-api-url");
   const candidates = [
     configuredUrl,
+    getApiBaseUrlFromPageHost(),
     API_BASE_URL
   ];
 
@@ -158,6 +159,11 @@ function getApiBaseUrls() {
       .filter(Boolean)
       .map(url => String(url).trim().replace(/\/+$/, ""))
   )];
+}
+
+function getApiBaseUrlFromPageHost() {
+  if (!window.location.hostname) return null;
+  return `${window.location.protocol}//${window.location.hostname}:8081/api`;
 }
 
 function salvarApiBaseUrlAtiva(baseUrl) {
