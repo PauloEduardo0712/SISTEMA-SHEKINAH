@@ -1,38 +1,58 @@
 # Frontend - Sistema de Escalas
 
-Interface web do sistema de escalas da Igreja Shekinah IAD.
+Interface web legada do sistema de escalas da Igreja Shekinah IAD.
 
-O frontend agora usa React, TypeScript e Vite. Parte das telas ainda roda sobre a camada legada em `src/legacy.ts`, que preserva o comportamento original enquanto a migração para componentes React acontece por etapas.
+O aplicativo principal do projeto e o mobile. Este frontend fica como apoio para comparar comportamento e testar pelo navegador.
 
 ## Requisitos
 
-- Node.js compatível com o Vite instalado.
-- Backend rodando em `http://localhost:8081/api`, ou uma URL configurada por ambiente.
+- Node.js compativel com o Vite.
+- Backend rodando na porta `8081`.
 
-## Configuração
+## Portas
 
-Crie um arquivo `.env` na pasta `frontend` se precisar mudar a URL da API:
+- Frontend web: `5173`
+- Backend/API: `8081`
 
-```env
-VITE_API_BASE_URL=http://localhost:8081/api
+No proprio computador, a API fica em:
+
+```text
+http://localhost:8081/api
 ```
 
-Há um exemplo em `.env.example`.
+Em outro computador na mesma rede, use o IP da maquina que roda o backend:
+
+```text
+http://SEU-IP:8081/api
+```
+
+Ao iniciar com `.\scripts\start-frontend.ps1`, o frontend usa `/api` e o Vite encaminha as chamadas para `http://localhost:8081`. Assim, outro computador precisa acessar apenas o site em `http://SEU-IP:5173`.
+
+## Configuracao
+
+Crie um arquivo `.env` na pasta `frontend` somente se precisar forcar outra URL da API:
+
+```env
+VITE_API_BASE_URL=http://SEU-IP:8081/api
+```
+
+Ha um exemplo em `.env.example`.
 
 ## Desenvolvimento
 
+Pela raiz do projeto:
+
 ```powershell
+.\scripts\start-frontend.ps1
+```
+
+Ou manualmente:
+
+```powershell
+cd C:\Users\Paulo55881126\Documents\SISTEMA-SHEKINAH\frontend
 npm.cmd install
-npm.cmd run dev
+npm.cmd run dev -- --host 0.0.0.0 --port 5173
 ```
-
-Abra a URL exibida pelo Vite, normalmente:
-
-```text
-http://127.0.0.1:5173/
-```
-
-Esse é o fluxo recomendado durante desenvolvimento, porque recompila React/TypeScript automaticamente.
 
 ## Build
 
@@ -41,16 +61,6 @@ npm.cmd run build
 ```
 
 O build final fica em `frontend/dist`.
-
-## Go Live
-
-O Live Server do VS Code está configurado para servir `frontend/dist`. Antes de usar o Go Live, rode:
-
-```powershell
-npm.cmd run build
-```
-
-Se você editar arquivos em `src`, o Go Live só mostrará as mudanças depois de um novo build.
 
 ## XAMPP
 
@@ -65,16 +75,3 @@ O script copia o build para:
 ```text
 C:\xampp\htdocs\sistema-shekinah
 ```
-
-Com o Apache atual na porta `8090`, acesse:
-
-```text
-http://localhost:8090/sistema-shekinah/
-```
-
-## Próximos passos técnicos
-
-- Migrar `src/legacy.ts` por telas para componentes React reais.
-- Remover gradualmente `innerHTML` e `onclick` em strings.
-- Usar os tipos de `src/types.ts` nos módulos novos.
-- Separar chamadas de API em um módulo dedicado.

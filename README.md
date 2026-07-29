@@ -17,9 +17,31 @@ Sistema de escalas da Igreja Shekinah IAD, com API Spring Boot e aplicativo prin
 
 ## Portas usadas
 
-- Backend: `http://localhost:8081/api`
-- Expo/mobile: `http://localhost:8082`
-- Frontend legado: porta exibida pelo Vite ao rodar `npm.cmd run dev`
+- Backend/API: `8081`
+- Expo/mobile: `8082`
+- Frontend web legado: `5173`
+- MySQL/Docker: `3310`
+
+Regra importante:
+
+- No proprio computador, `localhost` funciona.
+- No celular ou em outro computador, use o IP da maquina que esta rodando o backend, por exemplo `http://SEU-IP:8081/api`.
+
+Para ver o IP correto:
+
+```powershell
+.\scripts\show-network.ps1
+```
+
+## Comandos recomendados
+
+Rode sempre pela raiz do projeto para evitar pasta errada e URL errada:
+
+```powershell
+.\scripts\start-backend.ps1
+.\scripts\start-mobile.ps1
+.\scripts\start-frontend.ps1
+```
 
 ## Rodar o projeto principal
 
@@ -30,15 +52,20 @@ Abra dois terminais no PowerShell.
 No primeiro terminal:
 
 ```powershell
-cd C:\Users\Paulo55881126\Documents\SISTEMA-SHEKINAH\backend
-docker compose up -d
-.\gradlew.bat bootRun
+cd C:\Users\Paulo55881126\Documents\SISTEMA-SHEKINAH
+.\scripts\start-backend.ps1
 ```
 
 Quando estiver funcionando, o backend fica em:
 
 ```text
 http://localhost:8081/api
+```
+
+E tambem fica acessivel pela rede usando o IP do computador:
+
+```text
+http://SEU-IP:8081/api
 ```
 
 O backend inicia com o perfil `local` por padrao e usa MySQL local na porta `3310`.
@@ -48,14 +75,19 @@ O backend inicia com o perfil `local` por padrao e usa MySQL local na porta `331
 No segundo terminal:
 
 ```powershell
-cd C:\Users\Paulo55881126\Documents\SISTEMA-SHEKINAH\mobile
-npm.cmd install
-npx expo start --lan --port 8082
+cd C:\Users\Paulo55881126\Documents\SISTEMA-SHEKINAH
+.\scripts\start-mobile.ps1
 ```
 
 Depois escaneie o QR Code pelo app Expo Go.
 
-Se o QR Code nao abrir no celular, tente o modo tunnel:
+Esse script descobre o IP do computador e inicia o Expo ja apontando o app para:
+
+```text
+http://SEU-IP:8081/api
+```
+
+Se o QR Code nao abrir no celular, tente o modo tunnel manualmente:
 
 ```powershell
 cd C:\Users\Paulo55881126\Documents\SISTEMA-SHEKINAH\mobile
@@ -125,9 +157,20 @@ docker compose up -d
 O projeto principal e o mobile. O frontend web antigo pode ser usado apenas para comparar comportamento:
 
 ```powershell
-cd C:\Users\Paulo55881126\Documents\SISTEMA-SHEKINAH\frontend
-npm.cmd install
-npm.cmd run dev
+cd C:\Users\Paulo55881126\Documents\SISTEMA-SHEKINAH
+.\scripts\start-frontend.ps1
+```
+
+Para abrir em outro computador na mesma rede, use:
+
+```text
+http://SEU-IP:5173
+```
+
+Nesse caso, a API tambem precisa estar acessivel em:
+
+```text
+http://SEU-IP:8081/api
 ```
 
 ## Problemas comuns
@@ -146,6 +189,7 @@ npx expo start --lan --port 8082
 - Verifique se o celular e o computador estao na mesma rede Wi-Fi.
 - Escaneie o QR Code pelo app Expo Go.
 - Evite iniciar o Expo com `--localhost` para celular fisico.
+- Prefira iniciar pela raiz do projeto com `.\scripts\start-mobile.ps1`, porque ele configura a URL da API automaticamente.
 - Se o modo LAN falhar, use:
 
 ```powershell
@@ -170,6 +214,22 @@ docker compose up -d
 ```
 
 O projeto usa a porta `3310` no computador para evitar conflito com outro MySQL instalado na porta `3306`.
+
+### Abre no computador mas nao abre no celular/outro PC
+
+Use o IP do computador que esta rodando o backend. `localhost` nao funciona fora da propria maquina.
+
+```powershell
+.\scripts\show-network.ps1
+```
+
+Depois teste no outro aparelho:
+
+```text
+http://SEU-IP:8081/api/auth/me
+```
+
+Se nao responder, provavelmente o Windows Firewall bloqueou Java/Node ou os aparelhos nao estao na mesma rede.
 
 ### Porta 8081 ja esta em uso
 

@@ -49,12 +49,22 @@ function normalizeBaseUrl(url: string) {
 }
 
 function getExpoHost() {
-  const hostUri = Constants.expoConfig?.hostUri;
+  const constants = Constants as typeof Constants & {
+    manifest?: { debuggerHost?: string; hostUri?: string };
+    manifest2?: { extra?: { expoClient?: { hostUri?: string } } };
+  };
+
+  const hostUri =
+    Constants.expoConfig?.hostUri ||
+    constants.manifest2?.extra?.expoClient?.hostUri ||
+    constants.manifest?.hostUri ||
+    constants.manifest?.debuggerHost;
+
   if (!hostUri) {
     return null;
   }
 
-  const host = hostUri.split(":")[0];
+  const host = hostUri.replace(/^https?:\/\//, "").split(":")[0];
   return host && host !== "127.0.0.1" ? host : null;
 }
 

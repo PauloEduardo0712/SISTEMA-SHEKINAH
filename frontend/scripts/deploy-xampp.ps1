@@ -22,4 +22,4 @@ if (Test-Path $targetPath) {
 
 Copy-Item -LiteralPath $distPath -Destination $targetPath -Recurse -Force
 Write-Host "Publicado em $targetPath"
-Write-Host "Abra: http://localhost:8090/sistema-shekinah/"
+Write-Host "Abra pelo endereco configurado no Apache/XAMPP para /sistema-shekinah/"

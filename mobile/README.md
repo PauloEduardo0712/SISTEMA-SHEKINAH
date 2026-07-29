@@ -5,7 +5,7 @@ Aplicativo React Native com Expo para consultar escalas, atualizar disponibilida
 ## Requisitos
 
 - Node.js instalado.
-- Backend rodando em `http://localhost:8081/api`.
+- Backend rodando na porta `8081`.
 - Expo Go no celular, ou emulador Android/iOS configurado.
 
 ## Configuracao da API
@@ -15,6 +15,19 @@ Por padrao, o app usa:
 - Expo Go em celular fisico: o IP exibido pelo Expo na rede local
 - Android emulator: `http://10.0.2.2:8081/api`
 - iOS simulator e web: `http://localhost:8081/api`
+
+Para celular fisico, o jeito mais simples e iniciar pela raiz do projeto:
+
+```powershell
+cd C:\Users\Paulo55881126\Documents\SISTEMA-SHEKINAH
+.\scripts\start-mobile.ps1
+```
+
+Esse script configura automaticamente:
+
+```text
+EXPO_PUBLIC_API_BASE_URL=http://SEU-IP:8081/api
+```
 
 Se precisar forcar a URL da API:
 
@@ -28,7 +41,7 @@ npm.cmd start
 ```powershell
 cd C:\Users\Paulo55881126\Documents\SISTEMA-SHEKINAH\mobile
 npm.cmd install
-npx expo start --lan --port 8082
+npm.cmd run start:lan
 ```
 
 Depois escaneie o QR Code com o Expo Go ou rode:
@@ -46,13 +59,13 @@ O Expo usa a porta `8082` neste projeto para deixar a `8081` livre para o backen
 - Para celular fisico, prefira `--lan`:
 
 ```powershell
-npx expo start --lan --port 8082
+npm.cmd run start:lan
 ```
 
 - Se a rede ou o firewall bloquear, use tunnel:
 
 ```powershell
-npx expo start --tunnel --port 8082
+npm.cmd run start:tunnel
 ```
 
 - Evite `--localhost` quando estiver usando celular fisico.

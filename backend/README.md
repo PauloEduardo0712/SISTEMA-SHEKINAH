@@ -37,7 +37,8 @@ docker compose up -d
 O `bootRun` inicia com o perfil `local` por padrao, usando:
 
 - MySQL local em `localhost:3310/escala_shekinah`
-- porta `8081` por padrao, para evitar conflito com servidores locais comuns na `8080`
+- porta `8081` por padrao
+- endereco `0.0.0.0` no perfil local, permitindo acesso por celular/outros computadores da mesma rede
 
 URL local da API:
 
@@ -45,11 +46,26 @@ URL local da API:
 http://localhost:8081/api
 ```
 
+URL da API para celular ou outro computador:
+
+```text
+http://SEU-IP:8081/api
+```
+
+Para descobrir o IP:
+
+```powershell
+cd C:\Users\Paulo55881126\Documents\SISTEMA-SHEKINAH
+.\scripts\show-network.ps1
+```
+
 Se quiser rodar com a configuracao padrao do `application.properties`, execute:
 
 ```powershell
 .\gradlew.bat bootRun -Dspring.profiles.active=default
 ```
+
+Essa configuracao tambem usa a porta `8081`. Use `SERVER_PORT` apenas quando precisar trocar a porta manualmente.
 
 ## Variaveis de ambiente
 
@@ -60,6 +76,7 @@ Se quiser sobrescrever os padroes, use:
 - `DB_PASSWORD`
 - `JWT_SECRET`
 - `SERVER_PORT`
+- `SERVER_ADDRESS`
 
 Sem essas variaveis, a aplicacao padrao tenta usar a mesma configuracao do `docker-compose.yml`.
 

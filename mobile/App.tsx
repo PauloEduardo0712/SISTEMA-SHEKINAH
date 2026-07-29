@@ -14,7 +14,7 @@ import {
   View,
 } from "react-native";
 
-import { login, request } from "./src/api/client";
+import { API_BASE_URL, login, request } from "./src/api/client";
 import { AppButton } from "./src/components/AppButton";
 import { AppCard } from "./src/components/AppCard";
 import { EmptyState } from "./src/components/EmptyState";
@@ -198,11 +198,36 @@ function LoginScreen({ onAuthenticated }: { onAuthenticated: (auth: AuthResponse
   const [ministries, setMinistries] = useState<Ministry[]>([]);
   const [registerForm, setRegisterForm] = useState({ ...emptyVolunteerForm, password: "" });
   const [loading, setLoading] = useState(false);
+  const [ministriesLoading, setMinistriesLoading] = useState(true);
+  const [ministriesError, setMinistriesError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const activeMinistries = ministries.filter(item => item.active);
+
+  const loadMinistries = useCallback(async () => {
+    setMinistriesLoading(true);
+    setMinistriesError(null);
+
+    try {
+      const data = await request<Ministry[]>("/ministries");
+      setMinistries(data);
+      if (data.filter(item => item.active).length === 0) {
+        setMinistriesError("Nenhum ministerio ativo foi encontrado. Entre como admin e cadastre ou ative um ministerio.");
+      }
+    } catch (err) {
+      setMinistries([]);
+      setMinistriesError(
+        err instanceof Error
+          ? `${err.message} API: ${API_BASE_URL}`
+          : `Nao foi possivel carregar ministerios. API: ${API_BASE_URL}`,
+      );
+    } finally {
+      setMinistriesLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    request<Ministry[]>("/ministries").then(setMinistries).catch(() => setMinistries([]));
-  }, []);
+    loadMinistries();
+  }, [loadMinistries]);
 
   async function submitLogin() {
     setError(null);
@@ -272,12 +297,24 @@ function LoginScreen({ onAuthenticated }: { onAuthenticated: (auth: AuthResponse
               <OptionGrid
                 label="Ministerio"
                 value={registerForm.ministryId}
-                options={ministries.filter(item => item.active).map(item => ({ label: item.name, value: String(item.id) }))}
+                options={activeMinistries.map(item => ({ label: item.name, value: String(item.id) }))}
                 onChange={ministryId => setRegisterForm({ ...registerForm, ministryId })}
               />
+              {ministriesLoading ? (
+                <View style={styles.inlineLoading}>
+                  <ActivityIndicator color={colors.primary} size="small" />
+                  <Text style={styles.mutedText}>Carregando ministerios...</Text>
+                </View>
+              ) : null}
+              {ministriesError ? (
+                <View style={styles.warningBox}>
+                  <Text style={styles.warningText}>{ministriesError}</Text>
+                  <AppButton label="Tentar novamente" variant="secondary" loading={ministriesLoading} onPress={loadMinistries} />
+                </View>
+              ) : null}
               <TextField label="E-mail" value={registerForm.email} onChangeText={email => setRegisterForm({ ...registerForm, email })} keyboardType="email-address" autoCapitalize="none" />
               <TextField label="Telefone" value={registerForm.phone} onChangeText={phone => setRegisterForm({ ...registerForm, phone })} keyboardType="phone-pad" />
-              <AppButton label="Criar conta" loading={loading} disabled={!registerForm.ministryId} onPress={submitRegister} />
+              <AppButton label="Criar conta" loading={loading} disabled={!registerForm.ministryId || ministriesLoading || activeMinistries.length === 0} onPress={submitRegister} />
             </>
           )}
 
@@ -988,6 +1025,22 @@ const styles = StyleSheet.create({
   mutedText: {
     color: colors.muted,
     fontSize: typography.body,
+  },
+  inlineLoading: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+  },
+  warningBox: {
+    gap: spacing.sm,
+    padding: spacing.md,
+    borderRadius: radius.md,
+    backgroundColor: colors.primarySoft,
+  },
+  warningText: {
+    color: colors.primaryDark,
+    fontSize: typography.body,
+    fontWeight: "700",
   },
   errorText: {
     color: colors.danger,
