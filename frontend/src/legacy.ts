@@ -29,7 +29,9 @@ let appState = {
   ministerios: [],
   voluntarios: [],
   escalas: [],
-  conflitos: []
+  conflitos: [],
+  pedidosIa: [],
+  meusPedidosIa: []
 };
 
 function tokenTemFormatoJwt(token) {
@@ -224,6 +226,28 @@ function normalizeSchedule(item) {
   };
 }
 
+function normalizeAssistantRequest(item) {
+  return {
+    id: item.id,
+    requesterName: item.requester?.fullName || "-",
+    targetVolunteerName: item.targetVolunteer?.fullName || item.requester?.fullName || "-",
+    ministryName: item.ministry?.name || "Nao informado",
+    serviceDate: item.serviceDate || "",
+    serviceTime: item.serviceTime?.slice(0, 5) || "",
+    timeSlot: item.timeSlot || null,
+    roleName: item.roleName || "",
+    location: item.location || "",
+    eventName: item.eventName || "",
+    notes: item.notes || "",
+    originalMessage: item.originalMessage || "",
+    status: item.status,
+    adminNotes: item.adminNotes || "",
+    createdAt: item.createdAt || "",
+    decidedAt: item.decidedAt || "",
+    approvedScheduleId: item.approvedScheduleId || null
+  };
+}
+
 function applyAvailabilityToVolunteer(volunteerId, availabilities) {
   const volunteer = appState.voluntarios.find(item => item.id === volunteerId);
   if (!volunteer) return;
@@ -259,6 +283,8 @@ async function carregarDadosDoUsuario() {
     await carregarDisponibilidadesDeVoluntarios(appState.voluntarios);
     appState.escalas = (await apiRequest("/schedules")).map(normalizeSchedule);
     appState.conflitos = await apiRequest("/schedules/conflicts");
+    appState.pedidosIa = (await apiRequest("/assistant/requests?status=PENDENTE")).map(normalizeAssistantRequest);
+    appState.meusPedidosIa = [];
     return;
   }
 
@@ -267,6 +293,8 @@ async function carregarDadosDoUsuario() {
   applyAvailabilityToVolunteer(meuVoluntario.id, await apiRequest("/availabilities/me"));
   appState.escalas = (await apiRequest("/schedules")).map(normalizeSchedule);
   appState.conflitos = [];
+  appState.pedidosIa = [];
+  appState.meusPedidosIa = (await apiRequest("/assistant/requests/me")).map(normalizeAssistantRequest);
 
   appState.usuarioLogado = {
     ...appState.usuarioLogado,
@@ -291,6 +319,7 @@ async function atualizarAplicacaoAposLogin() {
   renderSidebar();
   await carregarDadosDoUsuario();
   document.getElementById("headerNome").textContent = appState.usuarioLogado.nome;
+  verificarLembretesIa();
   irPara(appState.paginaAtual || "dashboard");
 }
 /* =============================================
@@ -311,6 +340,15 @@ function normalizeText(value) {
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase();
+}
+
+function escapeHtml(value) {
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
 const THEME_STORAGE_KEY = "shekinah-theme";
@@ -705,6 +743,8 @@ function fazerLogout() {
   appState.voluntarios = [];
   appState.escalas = [];
   appState.conflitos = [];
+  appState.pedidosIa = [];
+  appState.meusPedidosIa = [];
   appState.paginaAtual = "dashboard";
   clearAuthState();
   document.getElementById("telaLogin").classList.remove("hidden");
@@ -819,6 +859,7 @@ function renderSidebar() {
     <div class="nav-item" data-page="dashboard" onclick="irPara('dashboard')"><span class="nav-icon">DG</span> Dashboard</div>
     <div class="nav-item" data-page="voluntarios" onclick="irPara('voluntarios')"><span class="nav-icon">VL</span> Voluntarios</div>
     <div class="nav-item" data-page="escalas" onclick="irPara('escalas')"><span class="nav-icon">ES</span> Escalas</div>
+    <div class="nav-item" data-page="assistente" onclick="irPara('assistente')"><span class="nav-icon">IA</span> Assistente IA</div>
     <div class="sidebar-section">Analises</div>
     <div class="nav-item" data-page="conflitos" onclick="irPara('conflitos')"><span class="nav-icon">CF</span> Conflitos</div>
     <div class="nav-item" data-page="disponibilidades" onclick="irPara('disponibilidades')"><span class="nav-icon">DP</span> Disponibilidades</div>
@@ -828,6 +869,7 @@ function renderSidebar() {
     <div class="sidebar-section">Meu painel</div>
     <div class="nav-item" data-page="dashboard" onclick="irPara('dashboard')"><span class="nav-icon">IN</span> Inicio</div>
     <div class="nav-item" data-page="minhas-escalas" onclick="irPara('minhas-escalas')"><span class="nav-icon">ME</span> Minhas Escalas</div>
+    <div class="nav-item" data-page="assistente" onclick="irPara('assistente')"><span class="nav-icon">IA</span> Assistente IA</div>
     <div class="nav-item" data-page="disponibilidade" onclick="irPara('disponibilidade')"><span class="nav-icon">DS</span> Disponibilidade</div>
     <div class="nav-item" data-page="calendario" onclick="irPara('calendario')"><span class="nav-icon">CL</span> Calendario</div>`;
 
@@ -860,6 +902,7 @@ function renderPagina(pagina) {
     escalas: isAdmin ? renderEscalas : null,
     conflitos: isAdmin ? renderConflitos : null,
     disponibilidades: isAdmin ? renderDisponibilidades : null,
+    assistente: renderAssistenteIa,
     "minhas-escalas": renderMinhasEscalas,
     disponibilidade: renderDisponibilidadeVol,
     calendario: renderCalendarioEscalas
@@ -1424,6 +1467,229 @@ function renderConflitos() {
           </div>`).join("")}
   `;
 }
+
+function renderAssistenteIa() {
+  const isAdmin = appState.usuarioLogado.perfil === "admin";
+  const pedidos = isAdmin ? appState.pedidosIa : appState.meusPedidosIa;
+  const pedidosTitulo = isAdmin ? "Pedidos pendentes para aprovacao" : "Meus pedidos para o admin";
+  const sugestoes = isAdmin
+    ? [
+        "Coloque a Maria no louvor domingo a noite como vocal",
+        "Escala o Joao dia 02/08 as 19h nos Diaconos",
+        "Quais pedidos estao pendentes?"
+      ]
+    : [
+        "Quero servir no louvor domingo a noite como vocal",
+        "Pode me colocar dia 02/08 as 19h?",
+        "Como esta minha escala?"
+      ];
+
+  return `
+    <div class="page-title">Assistente IA</div>
+    <div class="page-subtitle">Escreva do seu jeito. A IA transforma pedidos de escala em solicitações pendentes para aprovação.</div>
+
+    <div class="assistant-layout">
+      <div class="section-card assistant-chat-card">
+        <div class="assistant-hero">
+          <div>
+            <span class="assistant-kicker">IA Shekinah</span>
+            <h3>Como posso ajudar?</h3>
+            <p>${isAdmin ? "Crie pedidos para voluntarios, revise pendencias e tire duvidas do sistema." : "Consulte suas escalas, envie pedidos e receba lembretes importantes."}</p>
+          </div>
+          <span class="assistant-status-dot">Online</span>
+        </div>
+        <div class="assistant-suggestions">
+          ${sugestoes.map(texto => `<button class="assistant-chip" onclick="preencherPerguntaIa('${escapeHtml(texto)}')">${escapeHtml(texto)}</button>`).join("")}
+        </div>
+        <div id="assistantMessages" class="assistant-messages">
+          <div class="assistant-message assistant-message-ai">
+            Ola! Pode escrever naturalmente, por exemplo: "quero servir domingo a noite no louvor" ou "coloque a Ana na recepcao dia 05/08 as 9h".
+          </div>
+        </div>
+        <div class="assistant-input-row">
+          <textarea id="assistantInput" rows="3" placeholder="Digite aqui: quero servir domingo a noite no louvor como vocal"></textarea>
+          <button id="assistantSendBtn" class="btn btn-chama" onclick="enviarMensagemIa()">Enviar</button>
+        </div>
+      </div>
+
+      <div class="section-card assistant-side-card">
+        <div class="section-header">
+          <h3>${pedidosTitulo}</h3>
+          <button class="btn btn-ghost btn-sm" onclick="atualizarPedidosIa()">Atualizar</button>
+        </div>
+        <div class="assistant-mini-summary">
+          <strong>${pedidos.length}</strong>
+          <span>${pedidos.length === 1 ? "pedido encontrado" : "pedidos encontrados"}</span>
+        </div>
+        <div id="assistantRequestList" class="assistant-request-list">
+          ${renderPedidosIaList(pedidos, isAdmin)}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+async function verificarLembretesIa() {
+  if (!appState.usuarioLogado || appState.usuarioLogado.perfil === "admin") return;
+  try {
+    const reminders = await apiRequest("/assistant/reminders");
+    reminders.forEach(reminder => {
+      toast(reminder.message, "warning");
+      if ("Notification" in window && Notification.permission === "granted") {
+        new Notification(reminder.title, { body: reminder.message });
+      } else if ("Notification" in window && Notification.permission === "default") {
+        Notification.requestPermission().then(permission => {
+          if (permission === "granted") {
+            new Notification(reminder.title, { body: reminder.message });
+          }
+        });
+      }
+    });
+  } catch (error) {
+    console.warn("Nao foi possivel carregar lembretes da IA.", error);
+  }
+}
+
+function renderPedidoIaCard(pedido) {
+  const isAdmin = appState.usuarioLogado.perfil === "admin";
+  return `
+    <article class="assistant-request-card">
+      <div class="assistant-request-head">
+        <strong>${escapeHtml(pedido.ministryName)}</strong>
+        <span class="badge ${pedido.status === "PENDENTE" ? "badge-yellow" : pedido.status === "APROVADO" ? "badge-green" : "badge-red"}">${pedido.status}</span>
+      </div>
+      <div class="assistant-request-meta">
+        <span>${formatarData(pedido.serviceDate) || "Data pendente"}</span>
+        <span>${pedido.serviceTime || "Horario pendente"}</span>
+        <span>${escapeHtml(pedido.targetVolunteerName)}</span>
+      </div>
+      <p>${escapeHtml(pedido.originalMessage)}</p>
+      ${pedido.adminNotes ? `<div class="alert alert-info">${escapeHtml(pedido.adminNotes)}</div>` : ""}
+      ${isAdmin && pedido.status === "PENDENTE" ? `
+        <div class="form-actions compact-actions">
+          <button class="btn btn-chama btn-sm" onclick="aprovarPedidoIa(${pedido.id})">Aprovar e criar escala</button>
+          <button class="btn btn-danger btn-sm" onclick="recusarPedidoIa(${pedido.id})">Recusar</button>
+        </div>` : ""}
+    </article>
+  `;
+}
+
+function renderPedidosIaList(pedidos, isAdmin = appState.usuarioLogado?.perfil === "admin") {
+  return pedidos.length
+    ? pedidos.map(renderPedidoIaCard).join("")
+    : `<div class="assistant-empty-state">
+        <strong>${isAdmin ? "Sem pedidos pendentes" : "Nenhum pedido enviado"}</strong>
+        <span>${isAdmin ? "Quando alguem pedir uma escala pela IA, ela aparece aqui." : "Quando a IA criar um pedido para voce, ele aparece aqui."}</span>
+      </div>`;
+}
+
+function renderAssistentePedidosIa() {
+  const list = document.getElementById("assistantRequestList");
+  if (!list) return;
+  const isAdmin = appState.usuarioLogado.perfil === "admin";
+  const pedidos = isAdmin ? appState.pedidosIa : appState.meusPedidosIa;
+  list.innerHTML = renderPedidosIaList(pedidos, isAdmin);
+  const summary = document.querySelector(".assistant-mini-summary strong");
+  if (summary) summary.textContent = String(pedidos.length);
+}
+
+function preencherPerguntaIa(texto) {
+  const input = document.getElementById("assistantInput");
+  if (input) {
+    input.value = texto;
+    input.focus();
+  }
+}
+
+async function enviarMensagemIa() {
+  const input = document.getElementById("assistantInput");
+  const messages = document.getElementById("assistantMessages");
+  const sendBtn = document.getElementById("assistantSendBtn");
+  const message = input?.value?.trim();
+  if (!message) {
+    toast("Digite uma pergunta para a IA.", "warning");
+    return;
+  }
+
+  messages.insertAdjacentHTML("beforeend", `<div class="assistant-message assistant-message-user">${escapeHtml(message)}</div>`);
+  input.value = "";
+  if (sendBtn) {
+    sendBtn.disabled = true;
+    sendBtn.textContent = "Enviando...";
+  }
+
+  try {
+    const response = await apiRequest("/assistant/chat", {
+      method: "POST",
+      body: JSON.stringify({ message })
+    });
+    messages.insertAdjacentHTML("beforeend", `<div class="assistant-message assistant-message-ai">${escapeHtml(response.reply)}</div>`);
+    if (response.reminders?.length) {
+      messages.insertAdjacentHTML("beforeend", response.reminders.map(reminder => `
+        <div class="assistant-message assistant-message-alert">
+          <strong>${escapeHtml(reminder.title)}</strong><br>${escapeHtml(reminder.message)}
+        </div>`).join(""));
+    }
+    if (response.createdRequest) {
+      await atualizarPedidosIa(false);
+      renderAssistentePedidosIa();
+      toast("Pedido enviado para aprovacao do admin.", "success");
+    }
+  } catch (error) {
+    messages.insertAdjacentHTML("beforeend", `<div class="assistant-message assistant-message-alert">${escapeHtml(error.message || "Nao foi possivel falar com a IA.")}</div>`);
+  } finally {
+    if (sendBtn) {
+      sendBtn.disabled = false;
+      sendBtn.textContent = "Enviar";
+    }
+    messages.scrollTop = messages.scrollHeight;
+  }
+}
+
+async function atualizarPedidosIa(render = true) {
+  try {
+    if (appState.usuarioLogado.perfil === "admin") {
+      appState.pedidosIa = (await apiRequest("/assistant/requests?status=PENDENTE")).map(normalizeAssistantRequest);
+    } else {
+      appState.meusPedidosIa = (await apiRequest("/assistant/requests/me")).map(normalizeAssistantRequest);
+    }
+    if (render) renderPagina("assistente");
+  } catch (error) {
+    toast(error.message || "Nao foi possivel atualizar os pedidos da IA.", "danger");
+  }
+}
+
+async function aprovarPedidoIa(id) {
+  try {
+    const aprovado = await apiRequest(`/assistant/requests/${id}/approve`, {
+      method: "POST",
+      body: JSON.stringify({ adminNotes: "Aprovado pelo administrador." })
+    });
+    await carregarDadosDoUsuario();
+    if (aprovado?.serviceDate) {
+      appState.calendarioReferencia = aprovado.serviceDate.slice(0, 7);
+    }
+    toast("Pedido aprovado e escala criada no calendario.", "success");
+    irPara("calendario");
+  } catch (error) {
+    toast(error.message || "Nao foi possivel aprovar o pedido.", "danger");
+  }
+}
+
+async function recusarPedidoIa(id) {
+  const motivo = window.prompt("Motivo da recusa:", "Pedido recusado pelo administrador.");
+  if (motivo === null) return;
+  try {
+    await apiRequest(`/assistant/requests/${id}/reject`, {
+      method: "POST",
+      body: JSON.stringify({ adminNotes: motivo })
+    });
+    await atualizarPedidosIa();
+    toast("Pedido recusado.", "success");
+  } catch (error) {
+    toast(error.message || "Nao foi possivel recusar o pedido.", "danger");
+  }
+}
 /* =============================================
    VOLUNTARIO.JS - Painel e Disponibilidade do Voluntario
    ============================================= */
@@ -1808,6 +2074,16 @@ Object.assign(window, {
   confirmarExcluirEscala,
   excluirEscala,
   renderConflitos,
+  renderAssistenteIa,
+  verificarLembretesIa,
+  renderPedidoIaCard,
+  renderPedidosIaList,
+  renderAssistentePedidosIa,
+  preencherPerguntaIa,
+  enviarMensagemIa,
+  atualizarPedidosIa,
+  aprovarPedidoIa,
+  recusarPedidoIa,
   getMeuVoluntario,
   renderDashboardVoluntario,
   renderMinhasEscalas,

@@ -59,6 +59,28 @@ export interface Schedule {
   conflitoMsg: string;
 }
 
+export type AssistantRequestStatus = "PENDENTE" | "APROVADO" | "REJEITADO";
+
+export interface AssistantScheduleRequest {
+  id: number;
+  requesterName: string;
+  targetVolunteerName: string;
+  ministryName: string;
+  serviceDate: string;
+  serviceTime: string;
+  timeSlot: TimeSlot | null;
+  roleName: string;
+  location: string;
+  eventName: string;
+  notes: string;
+  originalMessage: string;
+  status: AssistantRequestStatus;
+  adminNotes: string;
+  createdAt: string;
+  decidedAt: string;
+  approvedScheduleId: number | null;
+}
+
 export interface AppState {
   token: string | null;
   usuarioLogado: LoggedUser | null;
@@ -68,4 +90,6 @@ export interface AppState {
   voluntarios: Volunteer[];
   escalas: Schedule[];
   conflitos: unknown[];
+  pedidosIa: AssistantScheduleRequest[];
+  meusPedidosIa: AssistantScheduleRequest[];
 }
