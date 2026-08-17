@@ -1,24 +1,24 @@
 CREATE TABLE ministries (
-    id BIGINT NOT NULL AUTO_INCREMENT,
-    created_at DATETIME NOT NULL,
-    updated_at DATETIME NOT NULL,
+    id BIGSERIAL NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL,
     name VARCHAR(120) NOT NULL,
     description VARCHAR(500),
-    active BIT NOT NULL,
+    active BOOLEAN NOT NULL,
     CONSTRAINT pk_ministries PRIMARY KEY (id),
     CONSTRAINT uk_ministries_name UNIQUE (name)
 );
 
 CREATE TABLE volunteers (
-    id BIGINT NOT NULL AUTO_INCREMENT,
-    created_at DATETIME NOT NULL,
-    updated_at DATETIME NOT NULL,
+    id BIGSERIAL NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL,
     full_name VARCHAR(150) NOT NULL,
     username VARCHAR(80) NOT NULL,
     email VARCHAR(255),
     phone VARCHAR(30),
     notes VARCHAR(500),
-    active BIT NOT NULL,
+    active BOOLEAN NOT NULL,
     CONSTRAINT pk_volunteers PRIMARY KEY (id),
     CONSTRAINT uk_volunteers_username UNIQUE (username)
 );
@@ -32,9 +32,9 @@ CREATE TABLE volunteer_ministries (
 );
 
 CREATE TABLE availabilities (
-    id BIGINT NOT NULL AUTO_INCREMENT,
-    created_at DATETIME NOT NULL,
-    updated_at DATETIME NOT NULL,
+    id BIGSERIAL NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL,
     volunteer_id BIGINT NOT NULL,
     day_of_week VARCHAR(20) NOT NULL,
     time_slot VARCHAR(20) NOT NULL,
@@ -45,9 +45,9 @@ CREATE TABLE availabilities (
 );
 
 CREATE TABLE schedules (
-    id BIGINT NOT NULL AUTO_INCREMENT,
-    created_at DATETIME NOT NULL,
-    updated_at DATETIME NOT NULL,
+    id BIGSERIAL NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL,
     ministry_id BIGINT NOT NULL,
     volunteer_id BIGINT NOT NULL,
     service_date DATE NOT NULL,
@@ -63,13 +63,13 @@ CREATE TABLE schedules (
 );
 
 CREATE TABLE user_accounts (
-    id BIGINT NOT NULL AUTO_INCREMENT,
-    created_at DATETIME NOT NULL,
-    updated_at DATETIME NOT NULL,
+    id BIGSERIAL NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL,
     username VARCHAR(80) NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     role VARCHAR(20) NOT NULL,
-    active BIT NOT NULL,
+    active BOOLEAN NOT NULL,
     volunteer_id BIGINT,
     CONSTRAINT pk_user_accounts PRIMARY KEY (id),
     CONSTRAINT uk_user_accounts_username UNIQUE (username),
