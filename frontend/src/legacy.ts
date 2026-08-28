@@ -311,6 +311,7 @@ async function carregarDadosDoUsuario() {
 }
 
 async function atualizarAplicacaoAposLogin() {
+  document.getElementById("telaApresentacao")?.classList.add("hidden");
   document.getElementById("telaLogin").classList.add("hidden");
   document.getElementById("appContainer").classList.remove("hidden");
   document.getElementById("headerBadge").textContent =
@@ -321,6 +322,7 @@ async function atualizarAplicacaoAposLogin() {
   document.getElementById("headerNome").textContent = appState.usuarioLogado.nome;
   verificarLembretesIa();
   irPara(appState.paginaAtual || "dashboard");
+  window.dispatchEvent(new CustomEvent("shekinah:authenticated"));
 }
 /* =============================================
    UTILS.JS - Funcoes auxiliares
@@ -745,7 +747,8 @@ function fazerLogout() {
   appState.meusPedidosIa = [];
   appState.paginaAtual = "dashboard";
   clearAuthState();
-  document.getElementById("telaLogin").classList.remove("hidden");
+  document.getElementById("telaApresentacao")?.classList.remove("hidden");
+  document.getElementById("telaLogin").classList.add("hidden");
   document.getElementById("appContainer").classList.add("hidden");
   document.getElementById("mainContent").innerHTML = "";
   document.getElementById("sidebar").innerHTML = "";

@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import type { Ministry, UserRole } from "../types";
 
-type LoginMode = "entrar" | "cadastro";
+export type LoginMode = "entrar" | "cadastro";
 
 const initialRegisterForm = {
   nome: "",
@@ -12,8 +12,13 @@ const initialRegisterForm = {
   telefone: ""
 };
 
-export function LoginPanel() {
-  const [mode, setMode] = useState<LoginMode>("entrar");
+type LoginPanelProps = {
+  initialMode?: LoginMode;
+  hidden?: boolean;
+};
+
+export function LoginPanel({ initialMode = "entrar", hidden = false }: LoginPanelProps) {
+  const [mode, setMode] = useState<LoginMode>(initialMode);
   const [loginForm, setLoginForm] = useState({
     usuario: "",
     senha: "",
@@ -41,6 +46,11 @@ export function LoginPanel() {
       active = false;
     };
   }, []);
+
+  useEffect(() => {
+    setMode(initialMode);
+    window.alternarModoLogin(initialMode);
+  }, [initialMode]);
 
   useEffect(() => {
     function resetPassword() {
@@ -74,8 +84,13 @@ export function LoginPanel() {
     if (success) setRegisterForm(initialRegisterForm);
   }
 
+  function changeMode(nextMode: LoginMode) {
+    setMode(nextMode);
+    window.alternarModoLogin(nextMode);
+  }
+
   return (
-    <div id="telaLogin" className="login-page">
+    <div id="telaLogin" className={`login-page ${hidden ? "hidden" : ""}`}>
       <div className="login-card">
         <div className="login-logo">
           <img src="img/logo-shekinah.png" alt="Shekinah" />
@@ -90,7 +105,7 @@ export function LoginPanel() {
             id="abaEntrar"
             className={`login-switch-btn ${mode === "entrar" ? "active" : ""}`}
             type="button"
-            onClick={() => setMode("entrar")}
+            onClick={() => changeMode("entrar")}
           >
             Entrar
           </button>
@@ -98,7 +113,7 @@ export function LoginPanel() {
             id="abaCriarConta"
             className={`login-switch-btn ${mode === "cadastro" ? "active" : ""}`}
             type="button"
-            onClick={() => setMode("cadastro")}
+            onClick={() => changeMode("cadastro")}
           >
             Criar conta
           </button>
