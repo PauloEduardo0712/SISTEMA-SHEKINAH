@@ -3,10 +3,43 @@
    ============================================= */
 
 @media (max-width: 900px) {
+  .assistant-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .assistant-side-card {
+    position: static;
+  }
+}
+
+@media (max-width: 700px) {
+  .assistant-hero {
+    flex-direction: column;
+  }
+
+  .assistant-suggestions {
+    flex-direction: column;
+  }
+
+  .assistant-chip {
+    width: 100%;
+    text-align: left;
+  }
+
+  .assistant-input-row {
+    grid-template-columns: 1fr;
+  }
+
+  .assistant-message {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 900px) {
   .cards-grid { grid-template-columns: repeat(2, 1fr); }
   .calendar-grid-head { display: none; }
   .calendar-grid-head,
-  .calendar-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .calendar-grid { grid-template-columns: repeat(2, minmax(220px, 1fr)); }
   .calendar-month-row { grid-template-columns: 1fr 1fr; }
 }
 
@@ -41,7 +74,7 @@
   }
 
   .main-content { padding: 14px; }
-  .cards-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .cards-grid { grid-template-columns: 1fr; gap: 12px; }
   .form-grid { grid-template-columns: 1fr; }
   .header-brand-sub { display: none; }
   .header-badge {
@@ -96,6 +129,11 @@
     flex-direction: column;
     align-items: stretch;
   }
+  .section-header .btn,
+  .form-actions .btn,
+  .action-cell .btn {
+    width: 100%;
+  }
   .section-body,
   .section-header {
     padding-left: 16px;
@@ -107,16 +145,60 @@
   .welcome-banner h2 { font-size: 16px; }
   .modal { padding: 20px; }
   .table-wrapper { font-size: 12px; }
-  th, td { padding: 8px 10px; }
+  .table-wrapper table {
+    min-width: 0;
+  }
+  .table-wrapper thead {
+    display: none;
+  }
+  .table-wrapper tbody,
+  .table-wrapper tr,
+  .table-wrapper td {
+    display: block;
+    width: 100%;
+  }
+  .table-wrapper tr {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-color);
+  }
+  .table-wrapper tr:last-child {
+    border-bottom: none;
+  }
+  .table-wrapper td {
+    border-bottom: none;
+    padding: 8px 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    text-align: right;
+  }
+  .table-wrapper td::before {
+    content: attr(data-label);
+    flex: 0 0 42%;
+    text-align: left;
+    color: var(--azul-claro);
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+  .table-wrapper td:empty::after {
+    content: "-";
+  }
   .vol-profile-card { flex-direction: column; text-align: center; }
   .calendar-shell { padding: 16px; }
   .calendar-toolbar { flex-direction: column; align-items: stretch; }
   .calendar-title-block { text-align: center; }
   .calendar-title-block h2 { font-size: 22px; }
   .calendar-grid-head,
-  .calendar-grid { grid-template-columns: 1fr; }
+  .calendar-grid { grid-template-columns: minmax(0, 1fr); }
   .calendar-day { min-height: auto; }
   .calendar-month-row { grid-template-columns: 1fr; }
+  #toastContainer {
+    top: 84px;
+    bottom: auto;
+  }
 }
 
 @media (max-width: 400px) {

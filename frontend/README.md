@@ -1,40 +1,77 @@
 # Frontend - Sistema de Escalas
 
-Interface web do sistema de escalas da Igreja Shekinah IAD, feita com HTML, CSS e JavaScript.
+Interface web legada do sistema de escalas da Igreja Shekinah IAD.
 
-## Estrutura
+O aplicativo principal do projeto e o mobile. Este frontend fica como apoio para comparar comportamento e testar pelo navegador.
+
+## Requisitos
+
+- Node.js compativel com o Vite.
+- Backend rodando na porta `8081`.
+
+## Portas
+
+- Frontend web: `5173`
+- Backend/API: `8081`
+
+No proprio computador, a API fica em:
 
 ```text
-frontend/
-|-- index.html
-|-- css/
-|   |-- global.css
-|   |-- login.css
-|   |-- admin.css
-|   |-- voluntario.css
-|   `-- responsivo.css
-|-- js/
-|   |-- dados.js
-|   |-- utils.js
-|   |-- validacoes.js
-|   |-- conflitos.js
-|   |-- login.js
-|   |-- admin.js
-|   |-- escalas.js
-|   `-- voluntario.js
-`-- img/
-    `-- logo-shekinah.svg
+http://localhost:8081/api
 ```
 
-## Como usar
+Em outro computador na mesma rede, use o IP da maquina que roda o backend:
 
-1. Inicie o backend com `backend\\gradlew.bat bootRun`.
-2. Abra `frontend/index.html` no navegador.
-3. Faca login com uma das credenciais cadastradas no backend.
+```text
+http://SEU-IP:8081/api
+```
 
-## Observacoes
+Ao iniciar com `.\scripts\start-frontend.ps1`, o frontend usa `/api` e o Vite encaminha as chamadas para `http://localhost:8081`. Assim, outro computador precisa acessar apenas o site em `http://SEU-IP:5173`.
 
-- A URL da API e lida de `localStorage["shekinah-api-url"]` quando existir.
-- Na ausencia dessa chave, o frontend usa `http://localhost:8081/api`.
-- A sessao salva no navegador e descartada automaticamente quando o token nao tem formato JWT valido.
-- O backend local sobe em H2 por padrao, entao o frontend pode ser usado mesmo sem MySQL ou Docker.
+## Configuracao
+
+Crie um arquivo `.env` na pasta `frontend` somente se precisar forcar outra URL da API:
+
+```env
+VITE_API_BASE_URL=http://SEU-IP:8081/api
+```
+
+Ha um exemplo em `.env.example`.
+
+## Desenvolvimento
+
+Pela raiz do projeto:
+
+```powershell
+.\scripts\start-frontend.ps1
+```
+
+Ou manualmente:
+
+```powershell
+cd C:\Users\Paulo55881126\Documents\SISTEMA-SHEKINAH\frontend
+npm.cmd install
+npm.cmd run dev -- --host 0.0.0.0 --port 5173
+```
+
+## Build
+
+```powershell
+npm.cmd run build
+```
+
+O build final fica em `frontend/dist`.
+
+## XAMPP
+
+Para publicar no Apache do XAMPP:
+
+```powershell
+npm.cmd run deploy:xampp
+```
+
+O script copia o build para:
+
+```text
+C:\xampp\htdocs\sistema-shekinah
+```

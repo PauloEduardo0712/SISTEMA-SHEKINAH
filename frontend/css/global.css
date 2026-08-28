@@ -1,5 +1,5 @@
 /* =============================================
-   GLOBAL.CSS - Sistema de Escalas Shekinah IAD
+   GLOBAL.CSS - Sistema de Escalas Shekinah
    ============================================= */
 
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600&display=swap');
@@ -82,12 +82,30 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+html {
+  min-width: 320px;
+  overflow-x: hidden;
+}
+
 body {
   font-family: 'Open Sans', sans-serif;
   background: var(--page-bg);
   color: var(--text-primary);
   min-height: 100vh;
+  overflow-x: hidden;
   transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+img,
+svg {
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  max-width: 100%;
 }
 
 body.menu-open,
@@ -104,6 +122,7 @@ h1, h2, h3, h4 { font-family: 'Montserrat', sans-serif; }
 .btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   padding: 9px 18px;
   border-radius: var(--radius-sm);
@@ -114,6 +133,10 @@ h1, h2, h3, h4 { font-family: 'Montserrat', sans-serif; }
   border: none;
   transition: all 0.15s;
   text-decoration: none;
+  min-height: 38px;
+  line-height: 1.2;
+  text-align: center;
+  white-space: normal;
 }
 
 .btn-sm { padding: 6px 12px; font-size: 12px; }
@@ -218,8 +241,17 @@ h1, h2, h3, h4 { font-family: 'Montserrat', sans-serif; }
   flex-wrap: wrap;
 }
 
-.table-wrapper { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+table {
+  width: 100%;
+  min-width: 680px;
+  border-collapse: collapse;
+  font-size: 13px;
+}
 
 th {
   background: var(--surface-muted);
@@ -263,6 +295,7 @@ tr:hover td { background: var(--table-hover); }
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
 }
 
 .section-header h3 {
@@ -333,6 +366,7 @@ tr:hover td { background: var(--table-hover); }
   transition: border 0.2s;
   background: var(--input-bg);
   color: var(--text-primary);
+  min-height: 38px;
 }
 
 .filter-bar input:focus,
@@ -373,10 +407,12 @@ tr:hover td { background: var(--table-hover); }
 
 .modal {
   background: var(--surface);
-  border-radius: 18px;
+  border-radius: 8px;
   padding: 30px;
   width: 500px;
   max-width: 95vw;
+  max-height: calc(100dvh - 48px);
+  overflow-y: auto;
   box-shadow: var(--modal-shadow);
   animation: slideIn 0.25s ease;
 }
@@ -480,7 +516,7 @@ tr:hover td { background: var(--table-hover); }
 .calendar-grid-head,
 .calendar-grid {
   display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-columns: repeat(7, minmax(145px, 1fr));
   gap: 12px;
 }
 
@@ -498,6 +534,7 @@ tr:hover td { background: var(--table-hover); }
   font-size: 12px;
   font-weight: 800;
   text-transform: uppercase;
+  min-width: 0;
 }
 
 .calendar-day {
@@ -509,6 +546,7 @@ tr:hover td { background: var(--table-hover); }
   display: flex;
   flex-direction: column;
   gap: 12px;
+  min-width: 0;
 }
 
 .calendar-day-has-scale {
@@ -579,6 +617,7 @@ tr:hover td { background: var(--table-hover); }
   font-size: 14px;
   font-weight: 800;
   color: var(--text-primary);
+  overflow-wrap: anywhere;
 }
 
 .calendar-scale-role {
@@ -663,18 +702,6 @@ tr:hover td { background: var(--table-hover); }
 }
 
 .theme-toggle:hover { transform: translateY(-1px); }
-.theme-toggle-icon {
-  width: 22px;
-  height: 22px;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255,255,255,0.12);
-  font-size: 11px;
-  line-height: 1;
-  font-weight: 800;
-}
 .theme-toggle-label { white-space: nowrap; }
 
 #toastContainer {
@@ -696,8 +723,12 @@ tr:hover td { background: var(--table-hover); }
 .hidden { display: none !important; }
 
 @media (max-width: 700px) {
+  body {
+    min-height: 100dvh;
+  }
+
   .main-content { padding: 16px; }
-  .cards-grid { grid-template-columns: repeat(2, 1fr); }
+  .cards-grid { grid-template-columns: 1fr; }
   .form-grid { grid-template-columns: 1fr; }
   .theme-toggle {
     top: 12px;
@@ -712,7 +743,8 @@ tr:hover td { background: var(--table-hover); }
   .modal {
     width: 100%;
     max-width: 100%;
-    border-radius: 16px;
+    border-radius: 8px;
+    padding: 20px;
   }
   #toastContainer {
     left: 12px;
