@@ -358,12 +358,10 @@ function getCurrentTheme() {
 }
 
 function atualizarBotaoTema() {
-  const icon = document.getElementById("themeToggleIcon");
   const label = document.getElementById("themeToggleLabel");
   const button = document.getElementById("themeToggleBtn");
   const temaEscuro = getCurrentTheme() === "dark";
 
-  if (icon) icon.textContent = temaEscuro ? "Sol" : "Lua";
   if (label) label.textContent = temaEscuro ? "Tema claro" : "Tema escuro";
 
   if (button) {
@@ -849,29 +847,29 @@ function renderSidebar() {
 
   const logoHTML = `
     <div class="sidebar-logo-area">
-      <img src="img/logo-shekinah.svg" alt="Shekinah IAD">
-      <span>Shekinah IAD</span>
+      <img src="img/logo-shekinah.png" alt="Shekinah">
+      <span>Shekinah</span>
       <small>Sistema de Escalas</small>
     </div>`;
 
   const navAdmin = `
     <div class="sidebar-section">Menu principal</div>
-    <div class="nav-item" data-page="dashboard" onclick="irPara('dashboard')"><span class="nav-icon">DG</span> Dashboard</div>
-    <div class="nav-item" data-page="voluntarios" onclick="irPara('voluntarios')"><span class="nav-icon">VL</span> Voluntarios</div>
-    <div class="nav-item" data-page="escalas" onclick="irPara('escalas')"><span class="nav-icon">ES</span> Escalas</div>
-    <div class="nav-item" data-page="assistente" onclick="irPara('assistente')"><span class="nav-icon">IA</span> Assistente IA</div>
+    <div class="nav-item" data-page="dashboard" onclick="irPara('dashboard')">Dashboard</div>
+    <div class="nav-item" data-page="voluntarios" onclick="irPara('voluntarios')">Voluntarios</div>
+    <div class="nav-item" data-page="escalas" onclick="irPara('escalas')">Escalas</div>
+    <div class="nav-item" data-page="assistente" onclick="irPara('assistente')">Assistente IA</div>
     <div class="sidebar-section">Analises</div>
-    <div class="nav-item" data-page="conflitos" onclick="irPara('conflitos')"><span class="nav-icon">CF</span> Conflitos</div>
-    <div class="nav-item" data-page="disponibilidades" onclick="irPara('disponibilidades')"><span class="nav-icon">DP</span> Disponibilidades</div>
-    <div class="nav-item" data-page="calendario" onclick="irPara('calendario')"><span class="nav-icon">CL</span> Calendario</div>`;
+    <div class="nav-item" data-page="conflitos" onclick="irPara('conflitos')">Conflitos</div>
+    <div class="nav-item" data-page="disponibilidades" onclick="irPara('disponibilidades')">Disponibilidades</div>
+    <div class="nav-item" data-page="calendario" onclick="irPara('calendario')">Calendario</div>`;
 
   const navVol = `
     <div class="sidebar-section">Meu painel</div>
-    <div class="nav-item" data-page="dashboard" onclick="irPara('dashboard')"><span class="nav-icon">IN</span> Inicio</div>
-    <div class="nav-item" data-page="minhas-escalas" onclick="irPara('minhas-escalas')"><span class="nav-icon">ME</span> Minhas Escalas</div>
-    <div class="nav-item" data-page="assistente" onclick="irPara('assistente')"><span class="nav-icon">IA</span> Assistente IA</div>
-    <div class="nav-item" data-page="disponibilidade" onclick="irPara('disponibilidade')"><span class="nav-icon">DS</span> Disponibilidade</div>
-    <div class="nav-item" data-page="calendario" onclick="irPara('calendario')"><span class="nav-icon">CL</span> Calendario</div>`;
+    <div class="nav-item" data-page="dashboard" onclick="irPara('dashboard')">Inicio</div>
+    <div class="nav-item" data-page="minhas-escalas" onclick="irPara('minhas-escalas')">Minhas Escalas</div>
+    <div class="nav-item" data-page="assistente" onclick="irPara('assistente')">Assistente IA</div>
+    <div class="nav-item" data-page="disponibilidade" onclick="irPara('disponibilidade')">Disponibilidade</div>
+    <div class="nav-item" data-page="calendario" onclick="irPara('calendario')">Calendario</div>`;
 
   sidebar.innerHTML = `
     ${logoHTML}

@@ -15,8 +15,8 @@ const initialRegisterForm = {
 export function LoginPanel() {
   const [mode, setMode] = useState<LoginMode>("entrar");
   const [loginForm, setLoginForm] = useState({
-    usuario: "admin",
-    senha: "1234",
+    usuario: "",
+    senha: "",
     perfil: "admin" as UserRole
   });
   const [registerForm, setRegisterForm] = useState(initialRegisterForm);
@@ -78,9 +78,9 @@ export function LoginPanel() {
     <div id="telaLogin" className="login-page">
       <div className="login-card">
         <div className="login-logo">
-          <img src="img/logo-shekinah.svg" alt="Shekinah IAD" />
+          <img src="img/logo-shekinah.png" alt="Shekinah" />
           <h2>Sistema de Escalas<br />Ministeriais</h2>
-          <p>Igreja Shekinah IAD - Um projeto de Deus</p>
+          <p>Igreja Shekinah - Um projeto de Deus</p>
         </div>
 
         <div className="login-divider" />
@@ -139,11 +139,6 @@ export function LoginPanel() {
 
           <button className="btn-login" type="submit">Entrar no sistema</button>
 
-          <div className="login-hint">
-            <strong>Admin:</strong> admin / 1234
-            &nbsp;|&nbsp;
-            <strong>Voluntario:</strong> joao, maria, carlos, ana, pedro - senha: 1234
-          </div>
         </form>
 
         <form id="painelCadastro" className={mode === "cadastro" ? "" : "hidden"} onSubmit={handleRegisterSubmit}>
@@ -229,7 +224,7 @@ export function LoginPanel() {
           </div>
         </form>
 
-        <p className="login-footer">Shekinah IAD &copy; 2026 - Todos os direitos reservados</p>
+        <p className="login-footer">Shekinah &copy; 2026 - Todos os direitos reservados</p>
       </div>
     </div>
   );

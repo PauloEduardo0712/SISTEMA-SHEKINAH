@@ -16,7 +16,6 @@ export function App() {
         aria-label="Ativar tema escuro"
         title="Ativar tema escuro"
       >
-        <span className="theme-toggle-icon" id="themeToggleIcon">Lua</span>
         <span className="theme-toggle-label" id="themeToggleLabel">Tema escuro</span>
       </button>
 
@@ -37,9 +36,9 @@ export function App() {
             <span />
           </button>
           <div className="header-brand">
-            <img src="img/logo-shekinah.svg" alt="Logo" className="header-logo" />
+            <img src="img/logo-shekinah.png" alt="Logo Shekinah" className="header-logo" />
             <div className="header-brand-text">
-              <span className="header-brand-name">Shekinah IAD</span>
+              <span className="header-brand-name">Shekinah</span>
               <span className="header-brand-sub">Sistema de Escalas</span>
             </div>
             <span className="header-badge" id="headerBadge">Admin</span>

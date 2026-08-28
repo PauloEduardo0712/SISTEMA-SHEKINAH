@@ -1,5 +1,5 @@
 /* =============================================
-   GLOBAL.CSS - Sistema de Escalas Shekinah IAD
+   GLOBAL.CSS - Sistema de Escalas Shekinah
    ============================================= */
 
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600&display=swap');
@@ -702,18 +702,6 @@ tr:hover td { background: var(--table-hover); }
 }
 
 .theme-toggle:hover { transform: translateY(-1px); }
-.theme-toggle-icon {
-  width: 22px;
-  height: 22px;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255,255,255,0.12);
-  font-size: 14px;
-  line-height: 1;
-  font-weight: 800;
-}
 .theme-toggle-label { white-space: nowrap; }
 
 #toastContainer {
