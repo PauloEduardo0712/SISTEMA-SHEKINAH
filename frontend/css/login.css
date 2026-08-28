@@ -2,6 +2,188 @@
    LOGIN.CSS - Tela de Login Shekinah
    ============================================= */
 
+.presentation-page {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background:
+    linear-gradient(135deg, rgba(10,22,40,0.94), rgba(26,58,110,0.9)),
+    radial-gradient(ellipse at 80% 20%, rgba(255,140,0,0.28), transparent 36%);
+  color: var(--branco);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 18px;
+  overflow-y: auto;
+}
+
+.presentation-shell {
+  width: min(1120px, 100%);
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.75fr);
+  gap: 42px;
+  align-items: center;
+}
+
+.presentation-brand {
+  grid-column: 1 / -1;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  width: fit-content;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  letter-spacing: 0.2px;
+}
+
+.presentation-logo {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 10px 26px rgba(0,0,0,0.28);
+}
+
+.presentation-content {
+  max-width: 660px;
+}
+
+.presentation-kicker {
+  color: var(--chama-claro);
+  font-family: 'Montserrat', sans-serif;
+  font-size: 13px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 14px;
+}
+
+.presentation-content h1 {
+  font-size: clamp(36px, 7vw, 70px);
+  line-height: 1.03;
+  font-weight: 900;
+  max-width: 780px;
+  color: var(--branco);
+}
+
+.presentation-description {
+  margin-top: 20px;
+  max-width: 560px;
+  color: rgba(255,255,255,0.82);
+  font-size: 18px;
+  line-height: 1.7;
+}
+
+.presentation-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: min(360px, 100%);
+  margin-top: 34px;
+}
+
+.presentation-primary,
+.presentation-secondary {
+  width: 100%;
+  min-height: 54px;
+  border-radius: 8px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 15px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.presentation-primary {
+  border: 0;
+  background: linear-gradient(135deg, var(--chama), var(--chama-claro));
+  color: var(--branco);
+  box-shadow: 0 14px 28px rgba(255,140,0,0.28);
+}
+
+.presentation-secondary {
+  border: 2px solid rgba(255,255,255,0.82);
+  background: rgba(255,255,255,0.08);
+  color: var(--branco);
+}
+
+.presentation-primary:hover,
+.presentation-secondary:hover {
+  transform: translateY(-2px);
+}
+
+.presentation-preview {
+  background: rgba(255,255,255,0.96);
+  color: var(--text-primary);
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 30px 70px rgba(0,0,0,0.32);
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+.presentation-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 18px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--border-color);
+  font-family: 'Montserrat', sans-serif;
+}
+
+.presentation-preview-header span {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.presentation-preview-header strong {
+  color: var(--azul-principal);
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.presentation-step {
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  gap: 14px;
+  padding: 14px 0;
+}
+
+.presentation-step + .presentation-step {
+  border-top: 1px solid var(--border-color);
+}
+
+.presentation-step > span {
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  background: var(--surface-muted);
+  color: var(--azul-claro);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+}
+
+.presentation-step strong {
+  display: block;
+  color: var(--azul-principal);
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.presentation-step p {
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.6;
+  margin-top: 4px;
+}
+
 .login-page {
   min-height: 100vh;
   min-height: 100dvh;
@@ -196,6 +378,44 @@
 }
 
 @media (max-width: 700px) {
+  .presentation-page {
+    align-items: flex-start;
+    padding: 22px 16px 28px;
+  }
+
+  .presentation-shell {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .presentation-brand {
+    grid-column: auto;
+  }
+
+  .presentation-logo {
+    width: 52px;
+    height: 52px;
+  }
+
+  .presentation-content h1 {
+    font-size: 38px;
+    line-height: 1.08;
+  }
+
+  .presentation-description {
+    font-size: 15px;
+    line-height: 1.65;
+  }
+
+  .presentation-actions {
+    width: 100%;
+    margin-top: 26px;
+  }
+
+  .presentation-preview {
+    padding: 18px;
+  }
+
   .login-page {
     align-items: flex-start;
     overflow-y: auto;
