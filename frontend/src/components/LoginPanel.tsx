@@ -148,6 +148,7 @@ export function LoginPanel({ initialMode = "entrar", hidden = false }: LoginPane
               onChange={event => setLoginForm({ ...loginForm, perfil: event.target.value as UserRole })}
             >
               <option value="admin">Administrador</option>
+              <option value="lider">Lider</option>
               <option value="voluntario">Voluntario</option>
             </select>
           </div>

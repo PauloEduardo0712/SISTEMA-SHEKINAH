@@ -1,4 +1,4 @@
-export type UserRole = "admin" | "voluntario";
+export type UserRole = "admin" | "lider" | "voluntario";
 export type ThemeName = "light" | "dark";
 export type AvailabilityStatus = "DISPONIVEL" | "INDISPONIVEL";
 export type TimeSlot = "MANHA" | "NOITE";
@@ -30,6 +30,7 @@ export interface Volunteer {
   telefone: string;
   obs: string;
   ativo: boolean;
+  perfil: UserRole;
   ministerios: Ministry[];
   ministerioIds: number[];
   ministerio: string;

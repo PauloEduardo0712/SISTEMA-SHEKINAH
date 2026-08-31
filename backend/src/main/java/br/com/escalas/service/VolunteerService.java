@@ -64,7 +64,7 @@ public class VolunteerService {
         UserAccount account = new UserAccount();
         account.setUsername(saved.getUsername());
         account.setPasswordHash(passwordEncoder.encode(request.password()));
-        account.setRole(Role.VOLUNTARIO);
+        account.setRole(resolveVolunteerRole(request.role()));
         account.setActive(saved.isActive());
         account.setVolunteer(saved);
         userAccountRepository.save(account);
@@ -83,6 +83,7 @@ public class VolunteerService {
             .orElseThrow(() -> new NotFoundException("Conta do voluntario nao encontrada."));
         account.setUsername(saved.getUsername());
         account.setActive(saved.isActive());
+        account.setRole(resolveVolunteerRole(request.role()));
         if (request.password() != null && !request.password().isBlank()) {
             account.setPasswordHash(passwordEncoder.encode(request.password()));
         }
@@ -115,8 +116,16 @@ public class VolunteerService {
             volunteer.getPhone(),
             volunteer.getNotes(),
             volunteer.isActive(),
+            userAccountRepository.findByVolunteerId(volunteer.getId()).map(UserAccount::getRole).orElse(Role.VOLUNTARIO),
             ministries
         );
+    }
+
+    private Role resolveVolunteerRole(Role requestedRole) {
+        if (requestedRole == Role.ADMIN) {
+            throw new BusinessException("Voluntarios nao podem receber perfil de administrador por esta tela.");
+        }
+        return requestedRole == Role.LIDER ? Role.LIDER : Role.VOLUNTARIO;
     }
 
     private void apply(Volunteer volunteer, VolunteerRequest request) {

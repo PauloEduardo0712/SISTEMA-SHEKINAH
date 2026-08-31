@@ -1,4 +1,4 @@
-export type Role = "ADMIN" | "VOLUNTARIO";
+export type Role = "ADMIN" | "LIDER" | "VOLUNTARIO";
 export type TimeSlot = "MANHA" | "NOITE";
 export type AvailabilityStatus = "DISPONIVEL" | "INDISPONIVEL";
 
