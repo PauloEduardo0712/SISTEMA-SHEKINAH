@@ -1,6 +1,7 @@
 package br.com.escalas.api.volunteer;
 
 import br.com.escalas.api.ministry.MinistryResponse;
+import br.com.escalas.domain.auth.Role;
 import java.util.Set;
 
 public record VolunteerResponse(
@@ -11,6 +12,7 @@ public record VolunteerResponse(
     String phone,
     String notes,
     boolean active,
+    Role role,
     Set<MinistryResponse> ministries
 ) {
 }

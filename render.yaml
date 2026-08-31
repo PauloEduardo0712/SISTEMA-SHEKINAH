@@ -2,19 +2,18 @@ services:
   - type: web
     name: sistema-shekinah-backend
     runtime: docker
-    plan: free
     rootDir: backend
-    dockerfilePath: ./Dockerfile
-    healthCheckPath: /api/ministries
-    autoDeploy: true
+    plan: free
     envVars:
+      - key: SERVER_ADDRESS
+        value: 0.0.0.0
+      - key: JWT_SECRET
+        sync: false
       - key: SPRING_DATASOURCE_URL
         sync: false
       - key: SPRING_DATASOURCE_USERNAME
         sync: false
       - key: SPRING_DATASOURCE_PASSWORD
         sync: false
-      - key: JWT_SECRET
-        generateValue: true
       - key: OLLAMA_ENABLED
-        value: false
+        value: "false"

@@ -1,8 +1,21 @@
 import { useEffect, useState } from "react";
 import { LoginPanel } from "./components/LoginPanel";
 import type { LoginMode } from "./components/LoginPanel";
+import type { LoggedUser } from "./types";
 
-function PresentationScreen({ onStart }: { onStart: (mode: LoginMode) => void }) {
+type PublicView = "presentation" | "login" | "app";
+
+function PresentationScreen({
+  savedSession,
+  onContinue,
+  onOtherAccount,
+  onStart
+}: {
+  savedSession: LoggedUser | null;
+  onContinue: () => void;
+  onOtherAccount: () => void;
+  onStart: (mode: LoginMode) => void;
+}) {
   return (
     <main id="telaApresentacao" className="presentation-page">
       <section className="presentation-shell">
@@ -19,14 +32,25 @@ function PresentationScreen({ onStart }: { onStart: (mode: LoginMode) => void })
             disponibilidade, conflitos e escalas em um so lugar.
           </p>
 
-          <div className="presentation-actions">
-            <button className="presentation-primary" type="button" onClick={() => onStart("entrar")}>
-              Entrar
-            </button>
-            <button className="presentation-secondary" type="button" onClick={() => onStart("cadastro")}>
-              Criar conta
-            </button>
-          </div>
+          {savedSession ? (
+            <div className="presentation-actions">
+              <button className="presentation-primary" type="button" onClick={onContinue}>
+                Entrar direto
+              </button>
+              <button className="presentation-secondary" type="button" onClick={onOtherAccount}>
+                Logar com outra conta
+              </button>
+            </div>
+          ) : (
+            <div className="presentation-actions">
+              <button className="presentation-primary" type="button" onClick={() => onStart("entrar")}>
+                Entrar
+              </button>
+              <button className="presentation-secondary" type="button" onClick={() => onStart("cadastro")}>
+                Criar conta
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="presentation-preview" aria-label="Resumo de funcionamento do sistema">
@@ -62,36 +86,74 @@ function PresentationScreen({ onStart }: { onStart: (mode: LoginMode) => void })
 }
 
 export function App() {
-  const [showPresentation, setShowPresentation] = useState(true);
-  const [authenticated, setAuthenticated] = useState(false);
+  const [view, setView] = useState<PublicView>("presentation");
   const [loginMode, setLoginMode] = useState<LoginMode>("entrar");
+  const [savedSession, setSavedSession] = useState<LoggedUser | null>(null);
+
+  const showPresentation = view === "presentation";
+  const authenticated = view === "app";
+
+  function showAppContainer(visible: boolean) {
+    document.getElementById("appContainer")?.classList.toggle("hidden", !visible);
+  }
+
+  function updateView(nextView: PublicView, mode: LoginMode = "entrar", push = true) {
+    setView(nextView);
+    setLoginMode(mode);
+    showAppContainer(nextView === "app");
+    if (push && window.history.state?.shekinahView !== nextView) {
+      window.history.pushState({ shekinahView: nextView, loginMode: mode }, "", window.location.href);
+    }
+  }
 
   useEffect(() => {
     function hidePublicScreens() {
-      setAuthenticated(true);
-      setShowPresentation(false);
+      updateView("app");
     }
 
     function showPresentationAgain() {
-      setAuthenticated(false);
-      setLoginMode("entrar");
-      setShowPresentation(true);
+      setSavedSession(window.getSessaoSalvaResumo());
+      updateView("presentation", "entrar");
     }
 
+    function handlePopState(event: PopStateEvent) {
+      const nextView = (event.state?.shekinahView || "presentation") as PublicView;
+      if (nextView === "presentation") {
+        setSavedSession(window.getSessaoSalvaResumo());
+        updateView("presentation", "entrar", false);
+      } else if (nextView === "login") {
+        updateView("login", event.state?.loginMode || "entrar", false);
+      } else {
+        updateView("app", "entrar", false);
+      }
+    }
+
+    window.history.replaceState({ shekinahView: "presentation", loginMode: "entrar" }, "", window.location.href);
     window.addEventListener("shekinah:authenticated", hidePublicScreens);
     window.addEventListener("shekinah:logout", showPresentationAgain);
+    window.addEventListener("popstate", handlePopState);
     window.inicializarInterface();
+    setSavedSession(window.getSessaoSalvaResumo());
 
     return () => {
       window.removeEventListener("shekinah:authenticated", hidePublicScreens);
       window.removeEventListener("shekinah:logout", showPresentationAgain);
+      window.removeEventListener("popstate", handlePopState);
     };
   }, []);
 
   function handleStart(mode: LoginMode) {
-    setAuthenticated(false);
-    setLoginMode(mode);
-    setShowPresentation(false);
+    updateView("login", mode);
+  }
+
+  async function handleContinueSession() {
+    await window.iniciarSessaoSalva();
+  }
+
+  function handleOtherAccount() {
+    window.limparSessaoSalva();
+    setSavedSession(null);
+    updateView("login", "entrar");
   }
 
   return (
@@ -107,7 +169,14 @@ export function App() {
         <span className="theme-toggle-label" id="themeToggleLabel">Tema escuro</span>
       </button>
 
-      {showPresentation && <PresentationScreen onStart={handleStart} />}
+      {showPresentation && (
+        <PresentationScreen
+          savedSession={savedSession}
+          onContinue={handleContinueSession}
+          onOtherAccount={handleOtherAccount}
+          onStart={handleStart}
+        />
+      )}
 
       <LoginPanel initialMode={loginMode} hidden={showPresentation || authenticated} />
 

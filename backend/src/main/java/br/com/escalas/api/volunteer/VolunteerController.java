@@ -26,13 +26,13 @@ public class VolunteerController {
     private final VolunteerService volunteerService;
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','LIDER')")
     public List<VolunteerResponse> findAll() {
         return volunteerService.findAll();
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','LIDER')")
     public VolunteerResponse findById(@PathVariable Long id) {
         return volunteerService.findById(id);
     }

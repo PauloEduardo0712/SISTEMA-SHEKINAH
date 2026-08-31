@@ -44,6 +44,7 @@ public class AuthService {
             request.notes(),
             request.ministryIds(),
             true,
+            null,
             request.password()
         ));
 

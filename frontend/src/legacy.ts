@@ -184,6 +184,40 @@ function normalizeMinistry(item) {
   };
 }
 
+function roleToPerfil(role) {
+  if (role === "ADMIN") return "admin";
+  if (role === "LIDER") return "lider";
+  return "voluntario";
+}
+
+function perfilToRole(perfil) {
+  if (perfil === "lider") return "LIDER";
+  if (perfil === "admin") return "ADMIN";
+  return "VOLUNTARIO";
+}
+
+function isAdminUser() {
+  return appState.usuarioLogado?.perfil === "admin";
+}
+
+function isLeaderUser() {
+  return appState.usuarioLogado?.perfil === "lider";
+}
+
+function canManageSchedules() {
+  return isAdminUser() || isLeaderUser();
+}
+
+function canManageVolunteers() {
+  return isAdminUser();
+}
+
+function roleLabel(perfil) {
+  if (perfil === "admin") return "Administrador";
+  if (perfil === "lider") return "Lider";
+  return "Voluntario";
+}
+
 function normalizeVolunteer(item) {
   const ministerios = (item.ministries || []).map(ministry => normalizeMinistry(ministry));
   return {
@@ -194,6 +228,7 @@ function normalizeVolunteer(item) {
     telefone: item.phone || "",
     obs: item.notes || "",
     ativo: item.active,
+    perfil: roleToPerfil(item.role),
     ministerios,
     ministerioIds: ministerios.map(ministry => ministry.id),
     ministerio: ministerios[0]?.nome || "-",
@@ -278,7 +313,7 @@ async function carregarDadosDoUsuario() {
 
   if (!appState.usuarioLogado) return;
 
-  if (appState.usuarioLogado.perfil === "admin") {
+  if (canManageSchedules()) {
     appState.voluntarios = (await apiRequest("/volunteers")).map(normalizeVolunteer);
     await carregarDisponibilidadesDeVoluntarios(appState.voluntarios);
     appState.escalas = (await apiRequest("/schedules")).map(normalizeSchedule);
@@ -311,18 +346,16 @@ async function carregarDadosDoUsuario() {
 }
 
 async function atualizarAplicacaoAposLogin() {
-  document.getElementById("telaApresentacao")?.classList.add("hidden");
+  window.dispatchEvent(new CustomEvent("shekinah:authenticated"));
   document.getElementById("telaLogin").classList.add("hidden");
   document.getElementById("appContainer").classList.remove("hidden");
-  document.getElementById("headerBadge").textContent =
-    appState.usuarioLogado.perfil === "admin" ? "Administrador" : "Voluntario";
+  document.getElementById("headerBadge").textContent = roleLabel(appState.usuarioLogado.perfil);
   document.getElementById("headerNome").textContent = appState.usuarioLogado.nome;
   renderSidebar();
   await carregarDadosDoUsuario();
   document.getElementById("headerNome").textContent = appState.usuarioLogado.nome;
   verificarLembretesIa();
   irPara(appState.paginaAtual || "dashboard");
-  window.dispatchEvent(new CustomEvent("shekinah:authenticated"));
 }
 /* =============================================
    UTILS.JS - Funcoes auxiliares
@@ -646,7 +679,7 @@ async function fazerLoginComDados({ usuario, senha, perfilSelecionado }) {
       body: JSON.stringify({ username: usuario, password: senha })
     });
 
-    const perfilApi = auth.role === "ADMIN" ? "admin" : "voluntario";
+    const perfilApi = roleToPerfil(auth.role);
     if (perfilApi !== perfilSelecionado) {
       toast("O perfil selecionado nao corresponde ao usuario informado.", "warning");
       return false;
@@ -747,13 +780,23 @@ function fazerLogout() {
   appState.meusPedidosIa = [];
   appState.paginaAtual = "dashboard";
   clearAuthState();
-  document.getElementById("telaApresentacao")?.classList.remove("hidden");
-  document.getElementById("telaLogin").classList.add("hidden");
+  document.getElementById("telaLogin").classList.remove("hidden");
   document.getElementById("appContainer").classList.add("hidden");
   document.getElementById("mainContent").innerHTML = "";
   document.getElementById("sidebar").innerHTML = "";
   document.getElementById("loginSenha").value = "";
   window.dispatchEvent(new CustomEvent("shekinah:logout"));
+}
+
+function getSessaoSalvaResumo() {
+  if (!restoreAuthState()) return null;
+  return appState.usuarioLogado;
+}
+
+function limparSessaoSalva() {
+  clearAuthState();
+  appState.token = null;
+  appState.usuarioLogado = null;
 }
 
 async function iniciarSessaoSalva() {
@@ -765,7 +808,7 @@ async function iniciarSessaoSalva() {
       id: me.volunteerId || me.userId,
       nome: appState.usuarioLogado?.nome || me.username,
       usuario: me.username,
-      perfil: me.role === "ADMIN" ? "admin" : "voluntario"
+      perfil: roleToPerfil(me.role)
     };
     saveAuthState();
     await atualizarAplicacaoAposLogin();
@@ -780,7 +823,6 @@ function inicializarInterface() {
   if (interfaceInicializada) return;
   interfaceInicializada = true;
   applyTheme(localStorage.getItem(THEME_STORAGE_KEY) || getCurrentTheme());
-  iniciarSessaoSalva();
   sincronizarMenuMobile();
 }
 
@@ -846,7 +888,8 @@ window.addEventListener("resize", sincronizarMenuMobile);
 
 function renderSidebar() {
   const sidebar = document.getElementById("sidebar");
-  const isAdmin = appState.usuarioLogado.perfil === "admin";
+  const isAdmin = isAdminUser();
+  const canOperate = canManageSchedules();
 
   const logoHTML = `
     <div class="sidebar-logo-area">
@@ -866,6 +909,16 @@ function renderSidebar() {
     <div class="nav-item" data-page="disponibilidades" onclick="irPara('disponibilidades')">Disponibilidades</div>
     <div class="nav-item" data-page="calendario" onclick="irPara('calendario')">Calendario</div>`;
 
+  const navLeader = `
+    <div class="sidebar-section">Operacao</div>
+    <div class="nav-item" data-page="dashboard" onclick="irPara('dashboard')">Dashboard</div>
+    <div class="nav-item" data-page="escalas" onclick="irPara('escalas')">Escalas</div>
+    <div class="nav-item" data-page="assistente" onclick="irPara('assistente')">Assistente IA</div>
+    <div class="sidebar-section">Analises</div>
+    <div class="nav-item" data-page="conflitos" onclick="irPara('conflitos')">Conflitos</div>
+    <div class="nav-item" data-page="disponibilidades" onclick="irPara('disponibilidades')">Disponibilidades</div>
+    <div class="nav-item" data-page="calendario" onclick="irPara('calendario')">Calendario</div>`;
+
   const navVol = `
     <div class="sidebar-section">Meu painel</div>
     <div class="nav-item" data-page="dashboard" onclick="irPara('dashboard')">Inicio</div>
@@ -876,7 +929,7 @@ function renderSidebar() {
 
   sidebar.innerHTML = `
     ${logoHTML}
-    ${isAdmin ? navAdmin : navVol}
+    ${isAdmin ? navAdmin : canOperate ? navLeader : navVol}
     <div class="sidebar-footer">
       <button class="btn-logout btn-logout-sidebar" onclick="fazerLogout()">Sair</button>
     </div>`;
@@ -895,14 +948,15 @@ async function irPara(pagina) {
 
 function renderPagina(pagina) {
   const main = document.getElementById("mainContent");
-  const isAdmin = appState.usuarioLogado.perfil === "admin";
+  const isAdmin = isAdminUser();
+  const canOperate = canManageSchedules();
 
   const mapa = {
-    dashboard: isAdmin ? renderDashboardAdmin : renderDashboardVoluntario,
+    dashboard: canOperate ? renderDashboardAdmin : renderDashboardVoluntario,
     voluntarios: isAdmin ? renderVoluntarios : null,
-    escalas: isAdmin ? renderEscalas : null,
-    conflitos: isAdmin ? renderConflitos : null,
-    disponibilidades: isAdmin ? renderDisponibilidades : null,
+    escalas: canOperate ? renderEscalas : null,
+    conflitos: canOperate ? renderConflitos : null,
+    disponibilidades: canOperate ? renderDisponibilidades : null,
     assistente: renderAssistenteIa,
     "minhas-escalas": renderMinhasEscalas,
     disponibilidade: renderDisponibilidadeVol,
@@ -924,7 +978,7 @@ function renderDashboardAdmin() {
 
   return `
     <div class="welcome-banner">
-      <h2>Bem-vindo, Administrador</h2>
+      <h2>Bem-vindo, ${roleLabel(appState.usuarioLogado.perfil)}</h2>
       <p>Gerencie as escalas ministeriais da igreja em tempo real pela API conectada.</p>
     </div>
 
@@ -1010,12 +1064,13 @@ function renderVoluntarios(filtro = "") {
     <div class="section-card">
       <div class="table-wrapper">
         <table>
-          <thead><tr><th>Nome</th><th>Usuario</th><th>Ministerio</th><th>Disponibilidade</th><th>Acoes</th></tr></thead>
+          <thead><tr><th>Nome</th><th>Usuario</th><th>Cargo</th><th>Ministerio</th><th>Disponibilidade</th><th>Acoes</th></tr></thead>
           <tbody>
             ${lista.map(v => `
               <tr>
                 <td><strong>${v.nome}</strong></td>
                 <td><span class="badge badge-blue">${v.usuario}</span></td>
+                <td><span class="badge ${v.perfil === "lider" ? "badge-chama" : "badge-green"}">${roleLabel(v.perfil)}</span></td>
                 <td>${v.ministerio}</td>
                 <td style="font-size:12px;">${(v.disponibilidade || []).map(key => DIAS_SEMANA.find(item => item.key === key)?.label || key).join(", ") || "-"}</td>
                 <td class="action-cell">
@@ -1053,6 +1108,13 @@ function abrirModalNovoVoluntario() {
         <label>Ministerio *</label>
         <select id="vMinisterio">${montarOpcoesMinisterio()}</select>
       </div>
+      <div class="form-group">
+        <label>Cargo *</label>
+        <select id="vPerfil">
+          <option value="voluntario">Voluntario</option>
+          <option value="lider">Lider</option>
+        </select>
+      </div>
     </div>
     <div class="form-group" style="margin-top:14px;">
       <label>Observacoes</label>
@@ -1071,6 +1133,7 @@ async function salvarNovoVoluntario() {
   const email = document.getElementById("vEmail").value.trim();
   const telefone = document.getElementById("vTelefone").value.trim();
   const ministryId = Number(document.getElementById("vMinisterio").value);
+  const perfil = document.getElementById("vPerfil").value;
   const obs = document.getElementById("vObs").value.trim();
 
   const erro = validarCamposObrigatorios({ Nome: nome, Usuario: usuario, Senha: senha, Ministerio: ministryId });
@@ -1090,6 +1153,7 @@ async function salvarNovoVoluntario() {
         notes: obs,
         ministryIds: [ministryId],
         active: true,
+        role: perfilToRole(perfil),
         password: senha
       })
     });
@@ -1118,6 +1182,13 @@ function abrirModalEditarVoluntario(id) {
         <label>Ministerio</label>
         <select id="vMinisterio">${montarOpcoesMinisterio(v.ministerioIds || [])}</select>
       </div>
+      <div class="form-group">
+        <label>Cargo</label>
+        <select id="vPerfil">
+          <option value="voluntario" ${v.perfil === "voluntario" ? "selected" : ""}>Voluntario</option>
+          <option value="lider" ${v.perfil === "lider" ? "selected" : ""}>Lider</option>
+        </select>
+      </div>
     </div>
     <div class="form-group" style="margin-top:14px;">
       <label>Observacoes</label>
@@ -1139,6 +1210,7 @@ async function salvarEdicaoVoluntario(id) {
     notes: document.getElementById("vObs").value.trim(),
     ministryIds: [Number(document.getElementById("vMinisterio").value)],
     active: atual?.ativo ?? true,
+    role: perfilToRole(document.getElementById("vPerfil").value),
     password: document.getElementById("vSenha").value.trim()
   };
 
@@ -1470,10 +1542,10 @@ function renderConflitos() {
 }
 
 function renderAssistenteIa() {
-  const isAdmin = appState.usuarioLogado.perfil === "admin";
-  const pedidos = isAdmin ? appState.pedidosIa : appState.meusPedidosIa;
-  const pedidosTitulo = isAdmin ? "Pedidos pendentes para aprovacao" : "Meus pedidos para o admin";
-  const sugestoes = isAdmin
+  const canOperate = canManageSchedules();
+  const pedidos = canOperate ? appState.pedidosIa : appState.meusPedidosIa;
+  const pedidosTitulo = canOperate ? "Pedidos pendentes para aprovacao" : "Meus pedidos para a lideranca";
+  const sugestoes = canOperate
     ? [
         "Coloque a Maria no louvor domingo a noite como vocal",
         "Escala o Joao dia 02/08 as 19h nos Diaconos",
@@ -1495,7 +1567,7 @@ function renderAssistenteIa() {
           <div>
             <span class="assistant-kicker">IA Shekinah</span>
             <h3>Como posso ajudar?</h3>
-            <p>${isAdmin ? "Crie pedidos para voluntarios, revise pendencias e tire duvidas do sistema." : "Consulte suas escalas, envie pedidos e receba lembretes importantes."}</p>
+            <p>${canOperate ? "Crie pedidos para voluntarios, revise pendencias e tire duvidas do sistema." : "Consulte suas escalas, envie pedidos e receba lembretes importantes."}</p>
           </div>
           <span class="assistant-status-dot">Online</span>
         </div>
@@ -1523,7 +1595,7 @@ function renderAssistenteIa() {
           <span>${pedidos.length === 1 ? "pedido encontrado" : "pedidos encontrados"}</span>
         </div>
         <div id="assistantRequestList" class="assistant-request-list">
-          ${renderPedidosIaList(pedidos, isAdmin)}
+          ${renderPedidosIaList(pedidos, canOperate)}
         </div>
       </div>
     </div>
@@ -1531,7 +1603,7 @@ function renderAssistenteIa() {
 }
 
 async function verificarLembretesIa() {
-  if (!appState.usuarioLogado || appState.usuarioLogado.perfil === "admin") return;
+  if (!appState.usuarioLogado || canManageSchedules()) return;
   try {
     const reminders = await apiRequest("/assistant/reminders");
     reminders.forEach(reminder => {
@@ -1552,7 +1624,7 @@ async function verificarLembretesIa() {
 }
 
 function renderPedidoIaCard(pedido) {
-  const isAdmin = appState.usuarioLogado.perfil === "admin";
+  const canOperate = canManageSchedules();
   return `
     <article class="assistant-request-card">
       <div class="assistant-request-head">
@@ -1566,7 +1638,7 @@ function renderPedidoIaCard(pedido) {
       </div>
       <p>${escapeHtml(pedido.originalMessage)}</p>
       ${pedido.adminNotes ? `<div class="alert alert-info">${escapeHtml(pedido.adminNotes)}</div>` : ""}
-      ${isAdmin && pedido.status === "PENDENTE" ? `
+      ${canOperate && pedido.status === "PENDENTE" ? `
         <div class="form-actions compact-actions">
           <button class="btn btn-chama btn-sm" onclick="aprovarPedidoIa(${pedido.id})">Aprovar e criar escala</button>
           <button class="btn btn-danger btn-sm" onclick="recusarPedidoIa(${pedido.id})">Recusar</button>
@@ -1575,21 +1647,21 @@ function renderPedidoIaCard(pedido) {
   `;
 }
 
-function renderPedidosIaList(pedidos, isAdmin = appState.usuarioLogado?.perfil === "admin") {
+function renderPedidosIaList(pedidos, canOperate = canManageSchedules()) {
   return pedidos.length
     ? pedidos.map(renderPedidoIaCard).join("")
     : `<div class="assistant-empty-state">
-        <strong>${isAdmin ? "Sem pedidos pendentes" : "Nenhum pedido enviado"}</strong>
-        <span>${isAdmin ? "Quando alguem pedir uma escala pela IA, ela aparece aqui." : "Quando a IA criar um pedido para voce, ele aparece aqui."}</span>
+        <strong>${canOperate ? "Sem pedidos pendentes" : "Nenhum pedido enviado"}</strong>
+        <span>${canOperate ? "Quando alguem pedir uma escala pela IA, ela aparece aqui." : "Quando a IA criar um pedido para voce, ele aparece aqui."}</span>
       </div>`;
 }
 
 function renderAssistentePedidosIa() {
   const list = document.getElementById("assistantRequestList");
   if (!list) return;
-  const isAdmin = appState.usuarioLogado.perfil === "admin";
-  const pedidos = isAdmin ? appState.pedidosIa : appState.meusPedidosIa;
-  list.innerHTML = renderPedidosIaList(pedidos, isAdmin);
+  const canOperate = canManageSchedules();
+  const pedidos = canOperate ? appState.pedidosIa : appState.meusPedidosIa;
+  list.innerHTML = renderPedidosIaList(pedidos, canOperate);
   const summary = document.querySelector(".assistant-mini-summary strong");
   if (summary) summary.textContent = String(pedidos.length);
 }
@@ -1634,7 +1706,7 @@ async function enviarMensagemIa() {
     if (response.createdRequest) {
       await atualizarPedidosIa(false);
       renderAssistentePedidosIa();
-      toast("Pedido enviado para aprovacao do admin.", "success");
+      toast("Pedido enviado para aprovacao da lideranca.", "success");
     }
   } catch (error) {
     messages.insertAdjacentHTML("beforeend", `<div class="assistant-message assistant-message-alert">${escapeHtml(error.message || "Nao foi possivel falar com a IA.")}</div>`);
@@ -1649,7 +1721,7 @@ async function enviarMensagemIa() {
 
 async function atualizarPedidosIa(render = true) {
   try {
-    if (appState.usuarioLogado.perfil === "admin") {
+    if (canManageSchedules()) {
       appState.pedidosIa = (await apiRequest("/assistant/requests?status=PENDENTE")).map(normalizeAssistantRequest);
     } else {
       appState.meusPedidosIa = (await apiRequest("/assistant/requests/me")).map(normalizeAssistantRequest);
@@ -1664,7 +1736,7 @@ async function aprovarPedidoIa(id) {
   try {
     const aprovado = await apiRequest(`/assistant/requests/${id}/approve`, {
       method: "POST",
-      body: JSON.stringify({ adminNotes: "Aprovado pelo administrador." })
+      body: JSON.stringify({ adminNotes: `Aprovado por ${roleLabel(appState.usuarioLogado.perfil)}.` })
     });
     await carregarDadosDoUsuario();
     if (aprovado?.serviceDate) {
@@ -1678,7 +1750,7 @@ async function aprovarPedidoIa(id) {
 }
 
 async function recusarPedidoIa(id) {
-  const motivo = window.prompt("Motivo da recusa:", "Pedido recusado pelo administrador.");
+  const motivo = window.prompt("Motivo da recusa:", `Pedido recusado por ${roleLabel(appState.usuarioLogado.perfil)}.`);
   if (motivo === null) return;
   try {
     await apiRequest(`/assistant/requests/${id}/reject`, {
@@ -2043,7 +2115,9 @@ Object.assign(window, {
   criarConta,
   criarContaComDados,
   fazerLogout,
+  getSessaoSalvaResumo,
   iniciarSessaoSalva,
+  limparSessaoSalva,
   inicializarInterface,
   toggleMobileMenu,
   fecharMenuMobile,
