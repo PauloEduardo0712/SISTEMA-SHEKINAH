@@ -1074,6 +1074,7 @@ function renderVoluntarios(filtro = "") {
                 <td>${v.ministerio}</td>
                 <td style="font-size:12px;">${(v.disponibilidade || []).map(key => DIAS_SEMANA.find(item => item.key === key)?.label || key).join(", ") || "-"}</td>
                 <td class="action-cell">
+                  <button class="btn btn-ghost btn-sm" onclick="alterarCargoVoluntario(${v.id}, '${v.perfil === "lider" ? "voluntario" : "lider"}')">${v.perfil === "lider" ? "Tornar voluntario" : "Tornar lider"}</button>
                   <button class="btn btn-ghost btn-sm" onclick="abrirModalEditarVoluntario(${v.id})">Editar</button>
                   <button class="btn btn-danger btn-sm" onclick="confirmarExcluirVoluntario(${v.id})">Excluir</button>
                 </td>
@@ -1235,6 +1236,32 @@ async function salvarEdicaoVoluntario(id) {
     renderPagina("voluntarios");
   } catch (error) {
     toast(error.message || "Nao foi possivel atualizar o voluntario.", "danger");
+  }
+}
+
+async function alterarCargoVoluntario(id, perfil) {
+  const atual = appState.voluntarios.find(item => item.id === id);
+  if (!atual) return;
+
+  try {
+    await apiRequest(`/volunteers/${id}`, {
+      method: "PUT",
+      body: JSON.stringify({
+        fullName: atual.nome,
+        username: atual.usuario,
+        email: atual.email,
+        phone: atual.telefone,
+        notes: atual.obs,
+        ministryIds: atual.ministerioIds,
+        active: atual.ativo,
+        role: perfilToRole(perfil)
+      })
+    });
+    await carregarDadosDoUsuario();
+    toast(perfil === "lider" ? "Voluntario definido como lider." : "Lider definido como voluntario.", "success");
+    renderPagina("voluntarios");
+  } catch (error) {
+    toast(error.message || "Nao foi possivel alterar o cargo.", "danger");
   }
 }
 
@@ -2137,6 +2164,7 @@ Object.assign(window, {
   salvarNovoVoluntario,
   abrirModalEditarVoluntario,
   salvarEdicaoVoluntario,
+  alterarCargoVoluntario,
   confirmarExcluirVoluntario,
   excluirVoluntario,
   renderDisponibilidades,
