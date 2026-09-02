@@ -1202,6 +1202,7 @@ function abrirModalEditarVoluntario(id) {
 
 async function salvarEdicaoVoluntario(id) {
   const atual = appState.voluntarios.find(item => item.id === id);
+  const novaSenha = document.getElementById("vSenha").value.trim();
   const payload = {
     fullName: document.getElementById("vNome").value.trim(),
     username: document.getElementById("vUsuario").value.trim(),
@@ -1210,9 +1211,12 @@ async function salvarEdicaoVoluntario(id) {
     notes: document.getElementById("vObs").value.trim(),
     ministryIds: [Number(document.getElementById("vMinisterio").value)],
     active: atual?.ativo ?? true,
-    role: perfilToRole(document.getElementById("vPerfil").value),
-    password: document.getElementById("vSenha").value.trim()
+    role: perfilToRole(document.getElementById("vPerfil").value)
   };
+
+  if (novaSenha) {
+    payload.password = novaSenha;
+  }
 
   const erro = validarCamposObrigatorios({ Nome: payload.fullName, Usuario: payload.username, Ministerio: payload.ministryIds[0] });
   if (erro) {
