@@ -43,6 +43,54 @@ Rode sempre pela raiz do projeto para evitar pasta errada e URL errada:
 .\scripts\start-frontend.ps1
 ```
 
+## Git e deploy
+
+Branch preparada para esta entrega:
+
+```powershell
+git branch --show-current
+```
+
+Deve mostrar:
+
+```text
+feat/auth-lider-ia-deploy
+```
+
+Para commitar e subir para o GitHub:
+
+```powershell
+git add .
+git commit -m "Adiciona lider, sessao salva e deploy"
+git remote add origin URL_DO_SEU_REPOSITORIO
+git push -u origin feat/auth-lider-ia-deploy
+```
+
+### Supabase
+
+Use o banco Postgres do Supabase no backend. No Render, configure:
+
+```text
+SPRING_DATASOURCE_URL=jdbc:postgresql://HOST:5432/postgres?sslmode=require
+SPRING_DATASOURCE_USERNAME=postgres
+SPRING_DATASOURCE_PASSWORD=SUA_SENHA_DO_SUPABASE
+JWT_SECRET=uma-chave-grande-e-segura
+```
+
+As migrations do Flyway ficam em `backend/src/main/resources/db/migration` e criam as tabelas automaticamente.
+
+### Render
+
+O arquivo `render.yaml` cria o servico Docker do backend usando a pasta `backend`. Depois de publicar, copie a URL do backend para o Vercel.
+
+### Vercel
+
+O arquivo `vercel.json` builda o frontend da pasta `frontend`. Configure no Vercel:
+
+```text
+VITE_API_BASE_URL=https://URL-DO-SEU-BACKEND-RENDER.onrender.com/api
+```
+
 ## Rodar o projeto principal
 
 Abra dois terminais no PowerShell.
@@ -118,6 +166,25 @@ carlos / 1234
 ana / 1234
 pedro / 1234
 ```
+
+## Cargos e permissoes
+
+- `ADMIN`: administra ministerios, cria/edita/exclui voluntarios, define cargos, gerencia escalas, ve conflitos, ve disponibilidades e aprova/recusa pedidos da IA.
+- `LIDER`: gerencia escalas, ve voluntarios, ve conflitos, ve disponibilidades e aprova/recusa pedidos da IA. Nao cria/edita/exclui voluntarios nem ministerios.
+- `VOLUNTARIO`: ve calendario/escalas, informa disponibilidade, consulta lembretes e cria pedidos pela IA.
+
+## IA com Llama/Ollama
+
+Para usar o Llama localmente, instale o Ollama e rode:
+
+```powershell
+ollama pull llama3.2:1b
+$env:OLLAMA_ENABLED="true"
+$env:OLLAMA_MODEL="llama3.2:1b"
+.\scripts\start-backend.ps1
+```
+
+Com `OLLAMA_ENABLED=false`, a IA continua com as regras internas do sistema.
 
 ## Banco MySQL
 

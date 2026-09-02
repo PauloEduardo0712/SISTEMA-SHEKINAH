@@ -77,8 +77,25 @@ Se quiser sobrescrever os padroes, use:
 - `JWT_SECRET`
 - `SERVER_PORT`
 - `SERVER_ADDRESS`
+- `OLLAMA_ENABLED`
+- `OLLAMA_URL`
+- `OLLAMA_MODEL`
 
 Sem essas variaveis, a aplicacao padrao tenta usar a mesma configuracao do `docker-compose.yml`.
+
+## Assistente IA com Llama/Ollama
+
+O backend ja conversa com modelos Llama pelo Ollama local. Para ativar:
+
+```powershell
+ollama pull llama3.2:1b
+$env:OLLAMA_ENABLED="true"
+$env:OLLAMA_URL="http://localhost:11434"
+$env:OLLAMA_MODEL="llama3.2:1b"
+.\gradlew.bat bootRun
+```
+
+Quando `OLLAMA_ENABLED=false`, o assistente continua funcionando com as regras internas do sistema: cria pedidos de escala, mostra lembretes, consulta escalas e usa respostas padrao.
 
 ## Credenciais iniciais
 
@@ -132,7 +149,7 @@ Sem essas variaveis, a aplicacao padrao tenta usar a mesma configuracao do `dock
 ## Regras implementadas
 
 - autenticacao JWT
-- perfis `ADMIN` e `VOLUNTARIO`
+- perfis `ADMIN`, `LIDER` e `VOLUNTARIO`
 - CRUD de ministerios
 - CRUD de voluntarios
 - disponibilidade por dia da semana e turno
@@ -140,6 +157,12 @@ Sem essas variaveis, a aplicacao padrao tenta usar a mesma configuracao do `dock
 - bloqueio de conflito por indisponibilidade
 - bloqueio de dupla escala no mesmo horario
 - seed inicial automatico
+
+### Permissoes por cargo
+
+- `ADMIN`: administra ministerios, cria/edita/exclui voluntarios, define cargos, gerencia escalas, ve conflitos, ve disponibilidades e aprova/recusa pedidos da IA.
+- `LIDER`: gerencia escalas, ve voluntarios, ve conflitos, ve disponibilidades e aprova/recusa pedidos da IA. Nao cria/edita/exclui voluntarios nem ministerios.
+- `VOLUNTARIO`: ve calendario/escalas, informa disponibilidade, consulta lembretes e cria pedidos pela IA.
 
 ## Observacoes
 

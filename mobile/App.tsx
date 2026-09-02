@@ -136,7 +136,9 @@ export default function App() {
     [loadCurrentUser],
   );
 
-  const isAdmin = (currentUser?.role ?? session?.role) === "ADMIN";
+  const currentRole = currentUser?.role ?? session?.role;
+  const isAdmin = currentRole === "ADMIN";
+  const canManageSchedules = isAdmin || currentRole === "LIDER";
   const visibleTabs = useMemo(() => tabs.filter(item => !item.adminOnly || isAdmin), [isAdmin]);
 
   if (booting) {
@@ -182,7 +184,7 @@ export default function App() {
         ))}
       </ScrollView>
 
-      {tab === "agenda" && <SchedulesScreen token={session.token} isAdmin={isAdmin} />}
+      {tab === "agenda" && <SchedulesScreen token={session.token} isAdmin={canManageSchedules} />}
       {tab === "disponibilidade" && <AvailabilityScreen token={session.token} />}
       {tab === "voluntarios" && isAdmin && <VolunteersScreen token={session.token} />}
       {tab === "ministerios" && isAdmin && <MinistriesScreen token={session.token} />}

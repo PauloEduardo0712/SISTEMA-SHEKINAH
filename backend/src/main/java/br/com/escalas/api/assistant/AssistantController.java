@@ -32,7 +32,7 @@ public class AssistantController {
     }
 
     @GetMapping("/requests")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','LIDER')")
     public List<AssistantScheduleRequestResponse> findRequests(
         @RequestParam(required = false) AssistantRequestStatus status
     ) {
@@ -45,7 +45,7 @@ public class AssistantController {
     }
 
     @PostMapping("/requests/{id}/approve")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','LIDER')")
     public AssistantScheduleRequestResponse approve(
         @PathVariable Long id,
         @Valid @RequestBody AssistantDecisionRequest request
@@ -54,7 +54,7 @@ public class AssistantController {
     }
 
     @PostMapping("/requests/{id}/reject")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','LIDER')")
     public AssistantScheduleRequestResponse reject(
         @PathVariable Long id,
         @Valid @RequestBody AssistantDecisionRequest request

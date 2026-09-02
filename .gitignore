@@ -22,11 +22,15 @@ backend/.gradle/
 backend/build/
 
 # Runtime logs and local database locks
+frontend/*.log
+frontend/*.err.log
 backend/*.log
 backend/*.err.log
 backend/data/*.mv.db
 backend/data/*.lock.db
 backend/data/*.trace.db
+mobile/*.log
+mobile/*.err.log
 mobile/expo.log
 
 # OS/editor noise

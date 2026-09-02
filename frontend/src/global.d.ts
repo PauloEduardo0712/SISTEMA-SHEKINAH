@@ -1,6 +1,6 @@
 export {};
 
-import type { Ministry, UserRole } from "./types";
+import type { LoggedUser, Ministry, UserRole } from "./types";
 
 declare global {
   interface Window {
@@ -12,6 +12,9 @@ declare global {
     fecharMenuMobile: () => void;
     fecharModal: (event: MouseEvent | React.MouseEvent<HTMLElement>) => void;
     inicializarInterface: () => void;
+    getSessaoSalvaResumo: () => LoggedUser | null;
+    iniciarSessaoSalva: () => Promise<void>;
+    limparSessaoSalva: () => void;
     carregarMinisteriosCadastroDados: () => Promise<Ministry[]>;
     fazerLoginComDados: (payload: {
       usuario: string;

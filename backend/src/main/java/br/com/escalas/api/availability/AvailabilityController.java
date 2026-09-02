@@ -24,7 +24,7 @@ public class AvailabilityController {
     private final AvailabilityService availabilityService;
 
     @GetMapping("/volunteer/{volunteerId}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','LIDER')")
     public List<AvailabilityResponse> findByVolunteer(@PathVariable Long volunteerId) {
         return availabilityService.findByVolunteer(volunteerId);
     }
@@ -35,7 +35,7 @@ public class AvailabilityController {
     }
 
     @PutMapping("/volunteer/{volunteerId}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','LIDER')")
     @ResponseStatus(HttpStatus.OK)
     public List<AvailabilityResponse> replaceForVolunteer(
         @PathVariable Long volunteerId,

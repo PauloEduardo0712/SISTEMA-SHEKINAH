@@ -1,5 +1,6 @@
 package br.com.escalas.api.volunteer;
 
+import br.com.escalas.domain.auth.Role;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
@@ -21,6 +22,7 @@ public record VolunteerRequest(
     @NotEmpty(message = "Selecione pelo menos um ministério.")
     Set<Long> ministryIds,
     boolean active,
+    Role role,
     @Size(min = 4, max = 60, message = "Senha deve ter entre 4 e 60 caracteres.")
     String password
 ) {

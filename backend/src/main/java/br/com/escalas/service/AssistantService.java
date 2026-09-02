@@ -98,7 +98,7 @@ public class AssistantService {
     @Value("${app.assistant.ollama.url:http://localhost:11434}")
     private String ollamaUrl;
 
-    @Value("${app.assistant.ollama.model:llama3.1}")
+    @Value("${app.assistant.ollama.model:llama3.2:1b}")
     private String ollamaModel;
 
     @Transactional
@@ -108,14 +108,16 @@ public class AssistantService {
         List<AssistantReminderResponse> reminders = findReminders(user);
 
         if (isScheduleRequest(message)) {
-            Volunteer requestVolunteer = requester != null ? requester : findVolunteerInMessage(message).orElse(null);
+            Volunteer requestVolunteer = canOperateSchedules(user.getRole())
+                ? findVolunteerInMessage(message).orElse(requester)
+                : requester;
             if (requestVolunteer == null) {
-                String reply = "Para criar um pedido de escala como administrador, informe o voluntario. "
+                String reply = "Para criar um pedido de escala como lideranca, informe o voluntario. "
                     + "Exemplo: \"coloque a Maria no louvor domingo a noite\".";
                 return new AssistantChatResponse(reply, null, reminders);
             }
             AssistantScheduleRequest created = createScheduleRequest(requestVolunteer, message);
-            String reply = "Pronto, deixei esse pedido pendente para o administrador aprovar. "
+            String reply = "Pronto, deixei esse pedido pendente para a lideranca aprovar. "
                 + describeMissingFields(created)
                 + " Voce pode acompanhar o status em Meus pedidos da IA.";
             return new AssistantChatResponse(reply, toResponse(created), reminders);
@@ -123,7 +125,7 @@ public class AssistantService {
 
         if (asksAboutSchedule(message)) {
             if (requester == null) {
-                String reply = "Como administrador, voce pode ver as escalas na tela Escalas e os pedidos da IA aqui. "
+                String reply = "Como lideranca, voce pode ver as escalas na tela Escalas e os pedidos da IA aqui. "
                     + "Para consultar uma escala pessoal no chat, entre com um usuario voluntario ou cite o voluntario no pedido.";
                 return new AssistantChatResponse(reply, null, reminders);
             }
@@ -140,7 +142,7 @@ public class AssistantService {
 
         String displayName = requester != null ? requester.getFullName() : user.getUsername();
         String llamaReply = askLlama(message, displayName, reminders, user.getRole()).orElse(null);
-        String fallback = "Posso te ajudar a consultar suas escalas, criar um pedido de escala para aprovacao do admin, "
+        String fallback = "Posso te ajudar a consultar suas escalas, criar um pedido de escala para aprovacao da lideranca, "
             + "ver lembretes de amanha e explicar como usar disponibilidade. Exemplo: "
             + "\"pedir escala para 2026-08-02 as 19:00 no louvor\".";
         return new AssistantChatResponse(llamaReply != null ? llamaReply : fallback, null, reminders);
@@ -444,6 +446,10 @@ public class AssistantService {
         } catch (Exception ex) {
             return Optional.empty();
         }
+    }
+
+    private boolean canOperateSchedules(Role role) {
+        return role == Role.ADMIN || role == Role.LIDER;
     }
 
     private String describeMissingFields(AssistantScheduleRequest item) {

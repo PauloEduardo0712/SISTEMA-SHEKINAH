@@ -44,26 +44,26 @@ public class ScheduleController {
     }
 
     @GetMapping("/conflicts")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','LIDER')")
     public List<ConflictResponse> findConflicts() {
         return scheduleService.findConflicts();
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','LIDER')")
     @ResponseStatus(HttpStatus.CREATED)
     public ScheduleResponse create(@Valid @RequestBody ScheduleRequest request) {
         return scheduleService.create(request);
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','LIDER')")
     public ScheduleResponse update(@PathVariable Long id, @Valid @RequestBody ScheduleRequest request) {
         return scheduleService.update(id, request);
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','LIDER')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {
         scheduleService.delete(id);
