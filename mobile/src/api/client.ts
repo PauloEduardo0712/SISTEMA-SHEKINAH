@@ -2,6 +2,7 @@ import Constants from "expo-constants";
 import { Platform } from "react-native";
 
 import type { AuthResponse } from "../types";
+import { demoRequest, disableDemoMode, enableDemoMode, isDemoMode, mockLogin } from "./demo";
 
 const fallbackHost = Platform.OS === "android" ? "10.0.2.2" : "localhost";
 const expoHost = getExpoHost();
@@ -16,6 +17,7 @@ type RequestOptions = {
 };
 
 export async function login(username: string, password: string) {
+  if (isDemoMode()) return mockLogin();
   return request<AuthResponse>("/auth/login", {
     method: "POST",
     body: { username, password },
@@ -23,6 +25,7 @@ export async function login(username: string, password: string) {
 }
 
 export async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  if (isDemoMode()) return demoRequest<T>(path, options);
   const response = await fetch(`${API_BASE_URL}${path}`, {
     method: options.method ?? "GET",
     headers: {
@@ -43,6 +46,8 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
 
   return response.json() as Promise<T>;
 }
+
+export { disableDemoMode, enableDemoMode, isDemoMode };
 
 function normalizeBaseUrl(url: string) {
   return url.trim().replace(/\/+$/, "");

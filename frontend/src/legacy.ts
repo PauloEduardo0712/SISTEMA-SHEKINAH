@@ -8,6 +8,28 @@ import { API_BASE_URL } from "./config";
    ============================================= */
 
 const AUTH_STORAGE_KEY = "shekinah-auth";
+let demoMode = false;
+
+const demoMinistries = [
+  { id: 1, name: "Louvor", description: "Musica e adoracao", active: true },
+  { id: 2, name: "Recepcao", description: "Acolhimento da igreja", active: true },
+  { id: 3, name: "Midia", description: "Projecao e transmissao", active: true }
+];
+const demoVolunteers = [
+  { id: 1, fullName: "Ana Souza", username: "ana", email: "ana@shekinah.org", phone: "(11) 99999-0001", notes: "", active: true, role: "VOLUNTARIO", ministries: [demoMinistries[0]] },
+  { id: 2, fullName: "Carlos Lima", username: "carlos", email: "carlos@shekinah.org", phone: "(11) 99999-0002", notes: "", active: true, role: "VOLUNTARIO", ministries: [demoMinistries[1]] },
+  { id: 3, fullName: "Maria Oliveira", username: "maria", email: "maria@shekinah.org", phone: "(11) 99999-0003", notes: "", active: true, role: "VOLUNTARIO", ministries: [demoMinistries[2]] }
+];
+const demoSchedules = [
+  { id: 1, ministry: demoMinistries[0], volunteer: demoVolunteers[0], serviceDate: new Date(Date.now() + 86400000 * 2).toISOString().slice(0, 10), serviceTime: "19:00:00", timeSlot: "NOITE", roleName: "Vocal", location: "Templo principal", eventName: "Culto de celebracao", notes: "Chegar 30 minutos antes", conflict: false, conflictMessage: null },
+  { id: 2, ministry: demoMinistries[1], volunteer: demoVolunteers[1], serviceDate: new Date(Date.now() + 86400000 * 4).toISOString().slice(0, 10), serviceTime: "18:30:00", timeSlot: "NOITE", roleName: "Boas-vindas", location: "Entrada", eventName: "Culto de domingo", notes: "", conflict: false, conflictMessage: null },
+  { id: 3, ministry: demoMinistries[2], volunteer: demoVolunteers[2], serviceDate: new Date(Date.now() + 86400000 * 7).toISOString().slice(0, 10), serviceTime: "19:00:00", timeSlot: "NOITE", roleName: "Projecao", location: "Cabine de midia", eventName: "Culto de oracao", notes: "", conflict: false, conflictMessage: null }
+];
+const demoAvailability = [
+  { id: 1, dayOfWeek: "SUNDAY", timeSlot: "NOITE", status: "DISPONIVEL" },
+  { id: 2, dayOfWeek: "WEDNESDAY", timeSlot: "NOITE", status: "DISPONIVEL" },
+  { id: 3, dayOfWeek: "SATURDAY", timeSlot: "MANHA", status: "INDISPONIVEL" }
+];
 
 const DIAS_SEMANA = [
   { key: "domingo-manha", label: "Domingo Manha", dayOfWeek: "SUNDAY", timeSlot: "MANHA" },
@@ -78,7 +100,8 @@ function restoreAuthState() {
     const parsed = JSON.parse(raw);
     appState.token = parsed.token || null;
     appState.usuarioLogado = parsed.usuarioLogado || null;
-    if (!tokenTemFormatoJwt(appState.token) || !appState.usuarioLogado) {
+    demoMode = appState.token === "shekinah-demo";
+    if ((!tokenTemFormatoJwt(appState.token) && !demoMode) || !appState.usuarioLogado) {
       clearAuthState();
       appState.token = null;
       appState.usuarioLogado = null;
@@ -92,6 +115,7 @@ function restoreAuthState() {
 }
 
 async function apiRequest(path, options = {}) {
+  if (demoMode) return demoApiRequest(path, options);
   const headers = {
     "Content-Type": "application/json",
     ...(options.headers || {})
@@ -146,6 +170,22 @@ async function apiRequest(path, options = {}) {
   }
 
   return data;
+}
+
+function demoApiRequest(path, options = {}) {
+  const method = options.method || "GET";
+  if (path === "/auth/me") return { userId: 1, volunteerId: null, username: "Administrador (demo)", role: "ADMIN" };
+  if (path === "/ministries") return demoMinistries;
+  if (path === "/volunteers") return demoVolunteers;
+  if (path === "/volunteers/me") return { ...demoVolunteers[0], role: "ADMIN" };
+  if (path.startsWith("/availabilities/")) return demoAvailability;
+  if (path === "/schedules" || path === "/schedules/me") return demoSchedules;
+  if (path === "/schedules/conflicts") return [];
+  if (path.startsWith("/assistant/requests")) return [];
+  if (path === "/assistant/reminders") return [];
+  if (path === "/assistant/chat") return { reply: "Esta e a demonstracao do sistema Shekinah. Os dados exibidos sao simulados.", createdRequest: null, reminders: [] };
+  if (method === "POST" || method === "PUT" || method === "DELETE") return null;
+  return [];
 }
 
 function getApiBaseUrls() {
@@ -780,12 +820,23 @@ function fazerLogout() {
   appState.meusPedidosIa = [];
   appState.paginaAtual = "dashboard";
   clearAuthState();
+  demoMode = false;
+  document.getElementById("demoModeBanner")?.classList.add("hidden");
   document.getElementById("telaLogin").classList.remove("hidden");
   document.getElementById("appContainer").classList.add("hidden");
   document.getElementById("mainContent").innerHTML = "";
   document.getElementById("sidebar").innerHTML = "";
   document.getElementById("loginSenha").value = "";
   window.dispatchEvent(new CustomEvent("shekinah:logout"));
+}
+
+async function entrarModoDemonstracao() {
+  demoMode = true;
+  appState.token = "shekinah-demo";
+  appState.usuarioLogado = { id: 1, nome: "Administrador (demo)", usuario: "admin-demo", perfil: "admin" };
+  saveAuthState();
+  document.getElementById("demoModeBanner")?.classList.remove("hidden");
+  await atualizarAplicacaoAposLogin();
 }
 
 function getSessaoSalvaResumo() {
@@ -2149,6 +2200,7 @@ Object.assign(window, {
   getSessaoSalvaResumo,
   iniciarSessaoSalva,
   limparSessaoSalva,
+  entrarModoDemonstracao,
   inicializarInterface,
   toggleMobileMenu,
   fecharMenuMobile,

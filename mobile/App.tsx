@@ -14,7 +14,8 @@ import {
   View,
 } from "react-native";
 
-import { API_BASE_URL, login, request } from "./src/api/client";
+import { API_BASE_URL, disableDemoMode, enableDemoMode, isDemoMode, login, request } from "./src/api/client";
+import { mockLogin } from "./src/api/demo";
 import { AppButton } from "./src/components/AppButton";
 import { AppCard } from "./src/components/AppCard";
 import { EmptyState } from "./src/components/EmptyState";
@@ -99,6 +100,7 @@ export default function App() {
 
   const signOut = useCallback(async () => {
     await clearSession();
+    disableDemoMode();
     setSession(null);
     setCurrentUser(null);
     setTab("agenda");
@@ -114,6 +116,7 @@ export default function App() {
       try {
         const stored = await getSession();
         if (stored?.token) {
+          if (stored.token === "demo-session") enableDemoMode();
           setSession(stored);
           await loadCurrentUser(stored.token);
         }
@@ -171,6 +174,8 @@ export default function App() {
         </View>
         <AppButton label="Sair" variant="ghost" onPress={signOut} />
       </View>
+
+      {isDemoMode() ? <View style={styles.demoBanner}><Text style={styles.demoBannerText}>MODO DEMONSTRACAO - dados simulados neste aparelho</Text></View> : null}
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabs}>
         {visibleTabs.map(item => (
@@ -290,6 +295,10 @@ function LoginScreen({ onAuthenticated }: { onAuthenticated: (auth: AuthResponse
               <TextField label="Usuario" value={username} onChangeText={setUsername} autoCapitalize="none" />
               <TextField label="Senha" value={password} onChangeText={setPassword} secureTextEntry />
               <AppButton label="Entrar" loading={loading} onPress={submitLogin} />
+              <AppButton label="Entrar na demonstracao" variant="secondary" onPress={async () => {
+                enableDemoMode();
+                await onAuthenticated(mockLogin());
+              }} />
             </>
           ) : (
             <>
@@ -872,6 +881,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     gap: spacing.md,
+  },
+  demoBanner: {
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.sm,
+    padding: spacing.sm,
+    borderRadius: radius.md,
+    backgroundColor: colors.primarySoft,
+  },
+  demoBannerText: {
+    color: colors.primaryDark,
+    fontSize: typography.caption,
+    fontWeight: "800",
+    textAlign: "center",
   },
   headerText: {
     flex: 1,
