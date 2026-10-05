@@ -51,6 +51,11 @@ function PresentationScreen({
               </button>
             </div>
           )}
+          <div className="presentation-actions">
+            <button className="presentation-secondary" type="button" onClick={() => window.entrarModoDemonstracao()}>
+              Entrar na demonstracao
+            </button>
+          </div>
         </div>
 
         <div className="presentation-preview" aria-label="Resumo de funcionamento do sistema">
@@ -181,6 +186,7 @@ export function App() {
       <LoginPanel initialMode={loginMode} hidden={showPresentation || authenticated} />
 
       <div id="appContainer" className="hidden">
+        <div id="demoModeBanner" className="demo-mode-banner hidden">MODO DEMONSTRACAO - dados simulados neste navegador</div>
         <header className="app-header">
           <button
             id="mobileMenuToggle"

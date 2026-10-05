@@ -15,6 +15,7 @@ declare global {
     getSessaoSalvaResumo: () => LoggedUser | null;
     iniciarSessaoSalva: () => Promise<void>;
     limparSessaoSalva: () => void;
+    entrarModoDemonstracao: () => Promise<void>;
     carregarMinisteriosCadastroDados: () => Promise<Ministry[]>;
     fazerLoginComDados: (payload: {
       usuario: string;

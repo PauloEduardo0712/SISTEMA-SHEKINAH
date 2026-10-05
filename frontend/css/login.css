@@ -110,6 +110,15 @@
   transform: translateY(-2px);
 }
 
+.demo-mode-banner {
+  padding: 10px 16px;
+  background: #fff4d6;
+  color: #704b00;
+  text-align: center;
+  font-weight: 800;
+  font-size: 13px;
+}
+
 .presentation-preview {
   background: rgba(255,255,255,0.96);
   color: var(--text-primary);
